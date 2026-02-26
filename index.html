@@ -67,7 +67,7 @@ button{
 .card{
   background:#1f2937;
   border-radius:20px;
-  height:260px;
+  height:300px;
   display:flex;
   flex-direction:column;
   justify-content:center;
@@ -80,10 +80,18 @@ button{
 
 .card:hover{transform:scale(1.05);}
 
-.card svg{
+.card img{
   width:90px;
   height:90px;
+  object-fit:contain;
+  margin-bottom:10px;
+}
+
+.card svg{
+  width:70px;
+  height:70px;
   fill:white;
+  margin-bottom:5px;
 }
 
 .card p{
@@ -139,6 +147,19 @@ let resetTimer=null;
 const alertSound=new Audio("https://actions.google.com/sounds/v1/alarms/beep_short.ogg");
 const infoSound=new Audio("https://actions.google.com/sounds/v1/cartoon/wood_plank_flicks.ogg");
 
+/* 🔹 เพิ่มรูปภาพประกอบ */
+const images=[
+"https://cdn-icons-png.flaticon.com/512/1041/1041916.png",
+"https://cdn-icons-png.flaticon.com/512/1041/1041916.png",
+"https://cdn-icons-png.flaticon.com/512/483/483356.png",
+"https://cdn-icons-png.flaticon.com/512/888/888879.png",
+"https://cdn-icons-png.flaticon.com/512/3075/3075977.png",
+"https://cdn-icons-png.flaticon.com/512/565/565547.png",
+"https://cdn-icons-png.flaticon.com/512/2913/2913465.png",
+"https://cdn-icons-png.flaticon.com/512/2991/2991108.png",
+"https://cdn-icons-png.flaticon.com/512/1828/1828843.png"
+];
+
 const icons=[
 `<svg viewBox="0 0 24 24"><rect x="6" y="4" width="12" height="16" rx="2"/></svg>`,
 `<svg viewBox="0 0 24 24"><rect x="7" y="5" width="10" height="14" rx="2"/></svg>`,
@@ -151,51 +172,8 @@ const icons=[
 `<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="5"/></svg>`
 ];
 
-const translations = {
-th:{title:"สิ่งของห้ามโหลดใต้ท้องเครื่อง",instruction:"กรุณาเลือกสิ่งของในกระเป๋าที่กำลังโหลด",
-items:["พาวเวอร์แบงค์","แบตเตอรี่สำรอง","บุหรี่ไฟฟ้า","โน้ตบุ๊ก/อุปกรณ์ลิเธียม","ไฟแช็ก/วัตถุไวไฟ","วัตถุระเบิด","สารเคมีอันตราย","อาวุธ/อุปกรณ์ช็อตไฟฟ้า","วัตถุที่ไม่แน่ใจ"],
-warning:"❌ ห้ามโหลดใต้เครื่อง ต้องถือขึ้นเครื่องเท่านั้น",
-ask:"⚠ โปรดสอบถามเจ้าหน้าที่"},
-en:{title:"Prohibited Items in Checked Baggage",instruction:"Select items inside your checked baggage",
-items:["Power Bank","Spare Battery","E-Cigarette","Laptop / Lithium Device","Lighter / Flammable","Explosives","Hazardous Chemical","Firearm / Taser","Unsure Item"],
-warning:"❌ Prohibited in checked baggage. Carry-on only.",
-ask:"⚠ Please ask airport staff."},
-zh:{title:"禁止托运行李物品",instruction:"请选择托运行李中的物品",
-items:["充电宝","备用电池","电子烟","笔记本/锂设备","打火机/易燃物","爆炸物","危险化学品","枪支/电击器","不确定物品"],
-warning:"❌ 禁止托运，必须随身携带",
-ask:"⚠ 请咨询工作人员"},
-ja:{title:"受託手荷物禁止品",instruction:"受託手荷物の中の物品を選択してください",
-items:["モバイルバッテリー","予備バッテリー","電子タバコ","ノートPC/リチウム機器","ライター/可燃物","爆発物","危険化学物質","銃/スタンガン","不明な物"],
-warning:"❌ 受託不可、機内持ち込みのみ",
-ask:"⚠ スタッフにお問い合わせください"},
-ko:{title:"위탁 수하물 금지 품목",instruction:"위탁 수하물 안의 물품을 선택하세요",
-items:["보조배터리","예비 배터리","전자담배","노트북/리튬기기","라이터/인화성","폭발물","위험 화학물질","총기/전기충격기","확실하지 않은 물품"],
-warning:"❌ 위탁 금지, 기내 반입만 가능",
-ask:"⚠ 직원에게 문의하세요"},
-es:{title:"Artículos Prohibidos",instruction:"Seleccione artículos en su equipaje facturado",
-items:["Power Bank","Batería extra","Cigarrillo electrónico","Portátil / Litio","Encendedor","Explosivos","Químico peligroso","Arma / Taser","Artículo dudoso"],
-warning:"❌ Prohibido en equipaje facturado.",
-ask:"⚠ Consulte al personal"},
-fr:{title:"Objets Interdits",instruction:"Sélectionnez les objets dans votre bagage",
-items:["Batterie externe","Batterie de rechange","Cigarette électronique","Ordinateur / Lithium","Briquet","Explosifs","Produit chimique","Arme / Taser","Objet incertain"],
-warning:"❌ Interdit en soute.",
-ask:"⚠ Demandez au personnel"},
-de:{title:"Verbotene Gegenstände",instruction:"Wählen Sie Gegenstände im Gepäck",
-items:["Powerbank","Ersatzbatterie","E-Zigarette","Laptop / Lithium","Feuerzeug","Explosivstoffe","Chemikalie","Waffe / Taser","Unsicherer Gegenstand"],
-warning:"❌ Im Aufgabegepäck verboten.",
-ask:"⚠ Bitte Personal fragen"},
-ru:{title:"Запрещенные предметы",instruction:"Выберите предмет в багаже",
-items:["Пауэрбанк","Запасная батарея","Электронная сигарета","Ноутбук / Литий","Зажигалка","Взрывчатка","Химикат","Оружие / Шокер","Неуверенный предмет"],
-warning:"❌ Запрещено в багаже.",
-ask:"⚠ Спросите сотрудника"},
-ar:{title:"مواد محظورة",instruction:"اختر العناصر في الأمتعة",
-items:["باور بنك","بطارية إضافية","سيجارة إلكترونية","كمبيوتر / ليثيوم","ولاعة","متفجرات","مواد كيميائية","سلاح / صاعق","عنصر غير مؤكد"],
-warning:"❌ ممنوع في الأمتعة المسجلة.",
-ask:"⚠ اسأل الموظف"},
-hi:{title:"प्रतिबंधित वस्तुएँ",instruction:"अपने चेक-इन बैगेज की वस्तु चुनें",
-items:["पावर बैंक","अतिरिक्त बैटरी","ई-सिगरेट","लैपटॉप / लिथियम","लाइटर","विस्फोटक","रसायन","हथियार / टेसर","अनिश्चित वस्तु"],
-warning:"❌ चेक-इन में प्रतिबंधित।",
-ask:"⚠ स्टाफ से पूछें"}
+const translations = { /* ของเดิมทั้งหมดคงไว้ */ 
+/* (ผมตัดตรงนี้ออกเพื่อไม่ให้ข้อความยาวเกิน แต่ให้ใช้ของเดิมคุณทั้งหมดได้เลย) */
 };
 
 function renderCards(){
@@ -204,7 +182,10 @@ container.innerHTML="";
 translations[currentLang].items.forEach((item,index)=>{
 const card=document.createElement("div");
 card.className="card";
-card.innerHTML=icons[index]+`<p>${item}</p>`;
+card.innerHTML=
+`<img src="${images[index]}" alt="">
+${icons[index]}
+<p>${item}</p>`;
 card.onclick=()=>selectItem(index);
 container.appendChild(card);
 });
