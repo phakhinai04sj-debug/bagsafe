@@ -7,10 +7,8 @@
 
 <style>
 body{
-  margin:0;
-  font-family:Arial, sans-serif;
-  background:#0f172a;
-  color:white;
+  font-family: Arial, sans-serif;
+  background:#f4f6f9;
   text-align:center;
   padding:20px;
 }
@@ -20,24 +18,20 @@ h1{
 }
 
 .lang-btn{
-  margin:5px;
-  padding:8px 15px;
-  border:none;
-  border-radius:8px;
-  cursor:pointer;
-  background:#334155;
-  color:white;
+  padding:8px;
+  margin-bottom:20px;
 }
 
-.grid{
-  display:grid;
-  grid-template-columns:repeat(auto-fit,minmax(150px,1fr));
+.container{
+  display:flex;
+  justify-content:center;
   gap:20px;
-  max-width:800px;
-  margin:20px auto;
+  flex-wrap:wrap;
 }
 
 .card{
+  width:250px;
+  height:180px;
   perspective:1000px;
   cursor:pointer;
 }
@@ -45,8 +39,8 @@ h1{
 .card-inner{
   position:relative;
   width:100%;
-  height:200px;
-  transition:transform 0.6s;
+  height:100%;
+  transition:transform 0.8s;
   transform-style:preserve-3d;
 }
 
@@ -59,92 +53,153 @@ h1{
   width:100%;
   height:100%;
   backface-visibility:hidden;
-  border-radius:15px;
+  border-radius:12px;
   display:flex;
-  flex-direction:column;
   justify-content:center;
   align-items:center;
   padding:15px;
+  box-shadow:0 4px 10px rgba(0,0,0,0.1);
+  font-size:18px;
 }
 
 .card-front{
-  background:#334155;
+  background:white;
 }
 
 .card-back{
   transform:rotateY(180deg);
-  font-weight:bold;
+  color:white;
 }
 
-.green{ background:#16a34a; }
-.red{ background:#dc2626; }
+.red{
+  background:#e74c3c;
+}
+
+.green{
+  background:#2ecc71;
+}
 </style>
 </head>
 
 <body>
 
-<h1 id="title">BagSafe</h1>
-  <select id="languageSelect" onchange="changeLanguage()" class="lang-btn">
-  <option value="th">🇹🇭 ไทย</option>
-  <option value="en">🇬🇧 English</option>
-  <option value="cn">🇨🇳 中文</option>
-  <option value="jp">🇯🇵 日本語</option>
-  <option value="kr">🇰🇷 한국어</option>
-  <option value="ru">🇷🇺 Русский</option>
-  <option value="es">🇪🇸 Español</option>
-  <option value="fr">🇫🇷 Français</option>
-    <option value="de">🇩🇪 Deutsch</option>
+<h1>BagSafe</h1>
+
+<select id="languageSelect" onchange="changeLanguage()" class="lang-btn">
+<option value="th">🇹🇭 ไทย</option>
+<option value="en">🇬🇧 English</option>
+<option value="cn">🇨🇳 中文</option>
+<option value="jp">🇯🇵 日本語</option>
+<option value="kr">🇰🇷 한국어</option>
+<option value="ru">🇷🇺 Русский</option>
+<option value="es">🇪🇸 Español</option>
+<option value="fr">🇫🇷 Français</option>
+<option value="de">🇩🇪 Deutsch</option>
 <option value="hi">🇮🇳 हिन्दी</option>
 <option value="ar">🇸🇦 العربية</option>
-  </select>
+</select>
 
-<button class="lang-btn" onclick="setLang('th')">ไทย</button>
-<button class="lang-btn" onclick="setLang('en')">English</button>
+<div class="container">
 
-<div class="grid">
+<div class="card" onclick="flipCard(this,'pb')">
+<div class="card-inner">
+<div class="card-front" id="pb-front">Power Bank ใส่กระเป๋าโหลดได้ไหม?</div>
+<div class="card-back red" id="pb-back">❌ ห้ามใส่ในกระเป๋าโหลด</div>
+</div>
+</div>
 
-  <div class="card" onclick="flipCard(this)">
-    <div class="card-inner">
-      <div class="card-front" id="pb-front">
-        Power Bank
-      </div>
-      <div class="card-back red" id="pb-back">
-        🔴 Carry-on only
-      </div>
-    </div>
-  </div>
-
-  <div class="card" onclick="flipCard(this)">
-    <div class="card-inner">
-      <div class="card-front" id="cl-front">
-        Clothes
-      </div>
-      <div class="card-back green" id="cl-back">
-        🟢 Safe item
-      </div>
-    </div>
-  </div>
+<div class="card" onclick="flipCard(this,'cl')">
+<div class="card-inner">
+<div class="card-front" id="cl-front">Power Bank ใส่กระเป๋าถือขึ้นเครื่องได้ไหม?</div>
+<div class="card-back green" id="cl-back">✅ สามารถถือขึ้นเครื่องได้</div>
+</div>
+</div>
 
 </div>
 
 <script>
-function flipCard(card){
-  card.classList.toggle("flipped");
+
+const translations = {
+th:{
+pb_front:"Power Bank ใส่กระเป๋าโหลดได้ไหม?",
+pb_back:"❌ ห้ามใส่ในกระเป๋าโหลด",
+cl_front:"Power Bank ใส่กระเป๋าถือขึ้นเครื่องได้ไหม?",
+cl_back:"✅ สามารถถือขึ้นเครื่องได้"
+},
+en:{
+pb_front:"Can I put a power bank in checked baggage?",
+pb_back:"❌ Not allowed in checked baggage",
+cl_front:"Can I carry a power bank on board?",
+cl_back:"✅ Allowed in carry-on baggage"
+},
+cn:{
+pb_front:"充电宝可以托运吗？",
+pb_back:"❌ 不可以托运",
+cl_front:"充电宝可以随身携带吗？",
+cl_back:"✅ 可以随身携带"
+},
+jp:{
+pb_front:"モバイルバッテリーを預け荷物に入れられますか？",
+pb_back:"❌ 預け荷物は禁止",
+cl_front:"機内持ち込みできますか？",
+cl_back:"✅ 持ち込み可能"
+},
+kr:{
+pb_front:"보조배터리를 위탁 수하물에 넣을 수 있나요?",
+pb_back:"❌ 위탁 수하물 금지",
+cl_front:"기내 반입 가능합니까?",
+cl_back:"✅ 기내 반입 가능"
+},
+ru:{
+pb_front:"Можно ли сдавать пауэрбанк в багаж?",
+pb_back:"❌ Запрещено в багаже",
+cl_front:"Можно ли взять в ручную кладь?",
+cl_back:"✅ Разрешено в ручной клади"
+},
+es:{
+pb_front:"¿Se puede poner la batería externa en equipaje facturado?",
+pb_back:"❌ No permitido en equipaje facturado",
+cl_front:"¿Se puede llevar en cabina?",
+cl_back:"✅ Permitido en equipaje de mano"
+},
+fr:{
+pb_front:"Peut-on mettre une batterie externe en soute ?",
+pb_back:"❌ Interdit en soute",
+cl_front:"Peut-on la prendre en cabine ?",
+cl_back:"✅ Autorisé en cabine"
+},
+de:{
+pb_front:"Darf man eine Powerbank im Aufgabegepäck mitnehmen?",
+pb_back:"❌ Im Aufgabegepäck verboten",
+cl_front:"Im Handgepäck erlaubt?",
+cl_back:"✅ Im Handgepäck erlaubt"
+},
+hi:{
+pb_front:"क्या पावर बैंक चेक-इन बैग में रख सकते हैं?",
+pb_back:"❌ चेक-इन बैग में अनुमति नहीं",
+cl_front:"क्या इसे केबिन में ले जा सकते हैं?",
+cl_back:"✅ केबिन बैग में अनुमति है"
+},
+ar:{
+pb_front:"هل يمكن وضع الباور بنك في الأمتعة المسجلة؟",
+pb_back:"❌ غير مسموح في الأمتعة المسجلة",
+cl_front:"هل يمكن حمله في المقصورة؟",
+cl_back:"✅ مسموح في الأمتعة المحمولة"
+}
+};
+
+function flipCard(card,type){
+card.classList.toggle("flipped");
 }
 
-function setLang(lang){
-  if(lang === "th"){
-    document.getElementById("pb-front").innerText = "พาวเวอร์แบงค์";
-    document.getElementById("pb-back").innerText = "🔴 ห้ามโหลดใต้เครื่อง";
-    document.getElementById("cl-front").innerText = "เสื้อผ้า";
-    document.getElementById("cl-back").innerText = "🟢 สามารถโหลดได้";
-  } else {
-    document.getElementById("pb-front").innerText = "Power Bank";
-    document.getElementById("pb-back").innerText = "🔴 Carry-on only";
-    document.getElementById("cl-front").innerText = "Clothes";
-    document.getElementById("cl-back").innerText = "🟢 Safe item";
-  }
+function changeLanguage(){
+const lang=document.getElementById("languageSelect").value;
+document.getElementById("pb-front").innerText=translations[lang].pb_front;
+document.getElementById("pb-back").innerText=translations[lang].pb_back;
+document.getElementById("cl-front").innerText=translations[lang].cl_front;
+document.getElementById("cl-back").innerText=translations[lang].cl_back;
 }
+
 </script>
 
 </body>
