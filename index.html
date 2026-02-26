@@ -1,152 +1,210 @@
 <!DOCTYPE html>
-<html>
+<html lang="th">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>BagSafe Game</title>
+<title>Bag Safe</title>
 
 <style>
 body{
-  font-family: Arial;
-  background:#f4f6f9;
-  text-align:center;
   margin:0;
-  padding:20px;
+  font-family:Arial, sans-serif;
+  background:#000;
+  color:white;
+  text-align:center;
+  overflow:hidden;
+}
+
+/* ===== HEADER (ไม่เลื่อน) ===== */
+header{
+  padding:15px;
+  background:#000;
+  position:fixed;
+  width:100%;
+  top:0;
+  z-index:10;
 }
 
 h1{
-  margin-bottom:20px;
+  color:#00ffcc;
+  margin:5px 0;
 }
 
-.slider{
-  display:flex;
-  overflow-x:auto;
-  scroll-snap-type:x mandatory;
-  gap:20px;
-  padding-bottom:20px;
+select{
+  padding:6px;
+  border-radius:8px;
+  font-size:16px;
 }
 
-.slider::-webkit-scrollbar{
-  display:none;
+.message{
+  margin-top:10px;
+  font-size:18px;
+  min-height:25px;
 }
 
-.card{
-  flex:0 0 280px;
-  height:380px;
-  scroll-snap-align:center;
-  perspective:1000px;
-}
-
-.card-inner{
-  width:100%;
-  height:100%;
-  position:relative;
-  transition:transform 0.4s;
-  transform-style:preserve-3d;
-}
-
-.card.flipped .card-inner{
-  transform:rotateY(180deg);
-}
-
-.card-front, .card-back{
+/* ===== SCROLL AREA ===== */
+.scroll-section{
   position:absolute;
+  top:140px;
+  bottom:0;
   width:100%;
-  height:100%;
-  border-radius:20px;
-  backface-visibility:hidden;
+  overflow-y:auto;
+  scroll-snap-type:y mandatory;
+}
+
+/* ===== CARD GROUP (6 ใบต่อหน้า) ===== */
+.card-group{
+  height:420px;
+  display:grid;
+  grid-template-columns:repeat(3, 1fr);
+  grid-template-rows:repeat(2, 1fr);
+  gap:12px;
+  padding:15px;
+  scroll-snap-align:start;
+}
+
+/* ===== CARD ===== */
+.card{
+  background:#111;
+  border-radius:15px;
   display:flex;
   flex-direction:column;
-  justify-content:center;
   align-items:center;
-  box-shadow:0 8px 20px rgba(0,0,0,0.15);
-  padding:20px;
+  justify-content:center;
+  font-size:16px;
+  cursor:pointer;
+  transition:0.3s;
+  padding:10px;
 }
 
-.card-front{
-  background:white;
+.card img{
+  width:40px;
+  margin-bottom:8px;
 }
 
-.card-front img{
-  width:120px;
-  margin-bottom:20px;
+.card:active{
+  transform:scale(0.9) rotateY(10deg);
 }
 
-.card-back{
-  background:#e74c3c;
-  color:white;
-  transform:rotateY(180deg);
-  font-size:20px;
-  font-weight:bold;
-}
+.red{ background:#ff3333; }
+.green{ background:#00cc66; }
+.blue{ background:#0099ff; }
+.yellow{ background:#ffcc00; color:black; }
 
 </style>
 </head>
 
 <body>
 
-<h1>BagSafe Card Game</h1>
+<header>
+  <h1 id="title">Bag Safe</h1>
 
-<div class="slider">
+  <select onchange="changeLang(this.value)">
+    <option value="th">ไทย</option>
+    <option value="en">English</option>
+    <option value="ru">Русский</option>
+    <option value="es">Español</option>
+    <option value="fr">Français</option>
+  </select>
 
-<!-- Power Bank ใบแรก -->
-<div class="card" onclick="flip(this)">
-  <div class="card-inner">
-    <div class="card-front">
-      <img src="https://cdn-icons-png.flaticon.com/512/1048/1048314.png">
-      <h2>Power Bank</h2>
+  <div class="message" id="message"></div>
+</header>
+
+<div class="scroll-section">
+
+  <!-- หน้า 1 -->
+  <div class="card-group">
+    <div class="card red" onclick="showMsg('powerbank')">
+      <img src="https://cdn-icons-png.flaticon.com/512/3103/3103446.png">
+      Powerbank
     </div>
-    <div class="card-back">
-      Allowed in Carry-on Only ⚠️
+
+    <div class="card green" onclick="showMsg('allowed')">
+      <img src="https://cdn-icons-png.flaticon.com/512/190/190411.png">
+      Allowed
+    </div>
+
+    <div class="card blue" onclick="showMsg('scan')">
+      <img src="https://cdn-icons-png.flaticon.com/512/483/483947.png">
+      Scan
+    </div>
+
+    <div class="card yellow" onclick="showMsg('battery')">
+      <img src="https://cdn-icons-png.flaticon.com/512/3103/3103446.png">
+      Battery
+    </div>
+
+    <div class="card red" onclick="showMsg('danger')">
+      <img src="https://cdn-icons-png.flaticon.com/512/564/564619.png">
+      Danger
+    </div>
+
+    <div class="card green" onclick="showMsg('checked')">
+      <img src="https://cdn-icons-png.flaticon.com/512/845/845646.png">
+      Checked
     </div>
   </div>
-</div>
 
-<!-- Explosives -->
-<div class="card" onclick="flip(this)">
-  <div class="card-inner">
-    <div class="card-front">
-      <img src="https://cdn-icons-png.flaticon.com/512/684/684908.png">
-      <h2>Explosives</h2>
-    </div>
-    <div class="card-back">
-      Not Allowed ❌
-    </div>
+  <!-- หน้า 2 -->
+  <div class="card-group">
+    <div class="card blue" onclick="showMsg('bag')">Bag</div>
+    <div class="card yellow" onclick="showMsg('alert')">Alert</div>
+    <div class="card red" onclick="showMsg('prohibited')">Prohibited</div>
+    <div class="card green" onclick="showMsg('safe')">Safe</div>
+    <div class="card blue" onclick="showMsg('info')">Info</div>
+    <div class="card yellow" onclick="showMsg('ok')">OK</div>
   </div>
-</div>
-
-<!-- Gas -->
-<div class="card" onclick="flip(this)">
-  <div class="card-inner">
-    <div class="card-front">
-      <img src="https://cdn-icons-png.flaticon.com/512/1046/1046784.png">
-      <h2>Compressed Gas</h2>
-    </div>
-    <div class="card-back">
-      Not Allowed ❌
-    </div>
-  </div>
-</div>
-
-<!-- Flammable Liquid -->
-<div class="card" onclick="flip(this)">
-  <div class="card-inner">
-    <div class="card-front">
-      <img src="https://cdn-icons-png.flaticon.com/512/3075/3075977.png">
-      <h2>Flammable Liquid</h2>
-    </div>
-    <div class="card-back">
-      Not Allowed ❌
-    </div>
-  </div>
-</div>
 
 </div>
 
 <script>
-function flip(card){
-  card.classList.toggle("flipped");
+
+const translations = {
+  th:{
+    powerbank:"พาวเวอร์แบงค์ต้องพกขึ้นเครื่อง",
+    allowed:"อนุญาต",
+    scan:"กรุณาสแกน",
+    battery:"แบตเตอรี่",
+    danger:"อันตราย",
+    checked:"ตรวจสอบแล้ว",
+    bag:"กระเป๋า",
+    alert:"แจ้งเตือน",
+    prohibited:"ห้ามนำเข้า",
+    safe:"ปลอดภัย",
+    info:"ข้อมูล",
+    ok:"เรียบร้อย"
+  },
+  en:{
+    powerbank:"Powerbank must carry on board",
+    allowed:"Allowed",
+    scan:"Please scan",
+    battery:"Battery",
+    danger:"Danger",
+    checked:"Checked",
+    bag:"Bag",
+    alert:"Alert",
+    prohibited:"Prohibited",
+    safe:"Safe",
+    info:"Information",
+    ok:"Completed"
+  }
+};
+
+let currentLang="th";
+
+function changeLang(lang){
+  currentLang=lang;
 }
+
+function showMsg(key){
+  if(translations[currentLang] && translations[currentLang][key]){
+    document.getElementById("message").innerText=
+    translations[currentLang][key];
+  }else{
+    document.getElementById("message").innerText=key;
+  }
+}
+
 </script>
 
 </body>
