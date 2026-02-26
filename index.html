@@ -1,11 +1,136 @@
 <!DOCTYPE html>
 <html lang="th">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>Airport Baggage Kiosk - Production</title>
 
-<link rel="stylesheet" href="style.css">
+<style>
+*{box-sizing:border-box}
+body{
+  margin:0;
+  font-family:Arial, sans-serif;
+  background:#0b1220;
+  color:#fff;
+  text-align:center;
+}
+
+header{
+  background:#111827;
+  padding:70px 20px 20px 20px;
+  position:sticky;
+  top:0;
+  z-index:10;
+}
+
+.top-bar{
+  position:absolute;
+  top:15px;
+  right:20px;
+}
+
+.menu-btn{
+  font-size:28px;
+  background:none;
+  border:none;
+  color:white;
+  cursor:pointer;
+}
+
+.dropdown{
+  display:none;
+  position:absolute;
+  right:0;
+  top:45px;
+  background:#1f2937;
+  border-radius:12px;
+  padding:10px;
+  min-width:190px;
+  box-shadow:0 5px 20px rgba(0,0,0,0.6);
+}
+
+.dropdown button{
+  width:100%;
+  background:none;
+  border:none;
+  color:white;
+  padding:10px;
+  text-align:left;
+  cursor:pointer;
+  border-radius:8px;
+}
+
+.dropdown button:hover{
+  background:#374151;
+}
+
+h1{margin:5px 0;color:#ff2d2d}
+.instructions{margin:8px 0;font-size:18px}
+
+select{
+  padding:8px 12px;
+  border-radius:10px;
+  border:none;
+  margin:5px;
+}
+
+.message{
+  margin-top:15px;
+  font-weight:bold;
+  min-height:50px;
+  font-size:20px;
+}
+
+.message.alert{
+  color:#ff3b3b;
+  animation:blink 0.6s infinite alternate;
+}
+
+@keyframes blink{
+  from{opacity:1}
+  to{opacity:0.5}
+}
+
+.card-group{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(200px,1fr));
+  gap:25px;
+  padding:30px;
+}
+
+.card{
+  background:#1f2937;
+  border-radius:20px;
+  height:220px;
+  display:flex;
+  flex-direction:column;
+  justify-content:center;
+  align-items:center;
+  cursor:pointer;
+  transition:0.3s;
+}
+
+.card:hover{transform:scale(1.05)}
+.card.selected{background:#b91c1c}
+
+.admin-panel{
+  display:none;
+  background:#1f2937;
+  margin:20px;
+  padding:20px;
+  border-radius:15px;
+}
+
+.admin-panel table{
+  width:100%;
+  border-collapse:collapse;
+}
+
+.admin-panel th,.admin-panel td{
+  border:1px solid #374151;
+  padding:8px;
+}
+</style>
 </head>
 <body>
 
@@ -48,108 +173,18 @@
 <button onclick="clearStats()">Clear Data</button>
 </div>
 
-<script src="script.js"></script>
-</body>
-</html>
-body{
-  margin:0;
-  font-family:Arial, sans-serif;
-  background:#0b1220;
-  color:white;
-  text-align:center;
-}
-
-header{
-  background:#111827;
-  padding:60px 20px 20px 20px;
-  position:sticky;
-  top:0;
-}
-
-.top-bar{
-  position:absolute;
-  top:15px;
-  right:20px;
-}
-
-.menu-btn{
-  font-size:30px;
-  background:none;
-  border:none;
-  color:white;
-  cursor:pointer;
-}
-
-.dropdown{
-  display:none;
-  position:absolute;
-  right:0;
-  top:45px;
-  background:#1f2937;
-  border-radius:12px;
-  padding:10px;
-  min-width:180px;
-}
-
-.dropdown button{
-  width:100%;
-  background:none;
-  border:none;
-  color:white;
-  padding:10px;
-  text-align:left;
-  cursor:pointer;
-}
-
-.dropdown button:hover{
-  background:#374151;
-  border-radius:8px;
-}
-
-.card-group{
-  display:grid;
-  grid-template-columns:repeat(auto-fit,minmax(200px,1fr));
-  gap:25px;
-  padding:30px;
-}
-
-.card{
-  background:#1f2937;
-  border-radius:20px;
-  height:240px;
-  display:flex;
-  flex-direction:column;
-  justify-content:center;
-  align-items:center;
-  cursor:pointer;
-  transition:0.3s;
-}
-
-.card:hover{transform:scale(1.05);}
-.card.selected{background:#b91c1c;}
-
-.message.alert{
-  color:#ff3b3b;
-  animation:blink 0.6s infinite alternate;
-}
-
-@keyframes blink{
-  from{opacity:1;}
-  to{opacity:0.5;}
-}
-
-.admin-panel{
-  display:none;
-  background:#1f2937;
-  margin:20px;
-  padding:20px;
-  border-radius:15px;
-}
+<script>
 let currentLang="th";
 let resetTimer=null;
 
 const alertSound=new Audio("https://actions.google.com/sounds/v1/alarms/beep_short.ogg");
 const infoSound=new Audio("https://actions.google.com/sounds/v1/cartoon/wood_plank_flicks.ogg");
+
+const langMap={
+th:"th-TH", en:"en-US", zh:"zh-CN", ja:"ja-JP", ko:"ko-KR",
+es:"es-ES", fr:"fr-FR", de:"de-DE", ru:"ru-RU",
+ar:"ar-SA", hi:"hi-IN"
+};
 
 const translations={
 th:{title:"สิ่งของห้ามโหลดใต้ท้องเครื่อง",instruction:"กรุณาเลือกสิ่งของ",
@@ -217,13 +252,14 @@ items:["पावर बैंक","बैटरी","ई-सिगरेट","�
 warning:"❌ प्रतिबंधित",
 warningSpeak:"चेक-इन बैगेज में अनुमति नहीं है।",
 ask:"⚠ स्टाफ से पूछें",
-askSpeak:"कृपया स्टाफ से पूछें।"}
+askSpeak:"कृपया स्टाफ से पूछें。"}
 };
 
 function speak(text){
-  const utter=new SpeechSynthesisUtterance(text);
-  utter.lang=currentLang;
   speechSynthesis.cancel();
+  const utter=new SpeechSynthesisUtterance(text);
+  utter.lang=langMap[currentLang];
+  utter.rate=0.95;
   speechSynthesis.speak(utter);
 }
 
@@ -233,13 +269,33 @@ function renderCards(){
   translations[currentLang].items.forEach((item,index)=>{
     const card=document.createElement("div");
     card.className="card";
-    card.innerHTML=`<p>${item}</p>`;
+    card.innerHTML="<p>"+item+"</p>";
     card.onclick=()=>selectItem(index);
     container.appendChild(card);
   });
 }
 
+function saveStat(index){
+  let stats=JSON.parse(localStorage.getItem("kioskStats")||"{}");
+  stats[index]=(stats[index]||0)+1;
+  localStorage.setItem("kioskStats",JSON.stringify(stats));
+}
+
+function renderStats(){
+  const table=document.getElementById("statsTable");
+  const stats=JSON.parse(localStorage.getItem("kioskStats")||"{}");
+  table.innerHTML="<tr><th>Item</th><th>Count</th></tr>";
+  Object.keys(stats).forEach(i=>{
+    table.innerHTML+="<tr><td>"+translations[currentLang].items[i]+"</td><td>"+stats[i]+"</td></tr>";
+  });
+}
+
 function selectItem(index){
+  saveStat(index);
+
+  document.querySelectorAll(".card").forEach(c=>c.classList.remove("selected"));
+  document.querySelectorAll(".card")[index].classList.add("selected");
+
   const data=translations[currentLang];
   const msg=document.getElementById("message");
 
@@ -260,6 +316,7 @@ function selectItem(index){
 }
 
 function resetAll(){
+  document.querySelectorAll(".card").forEach(c=>c.classList.remove("selected"));
   document.getElementById("message").innerText="";
 }
 
@@ -268,13 +325,23 @@ function toggleMenu(){
   menu.style.display=menu.style.display==="block"?"none":"block";
 }
 
+document.addEventListener("click",function(e){
+  const menu=document.getElementById("menuDropdown");
+  const btn=document.querySelector(".menu-btn");
+  if(!btn.contains(e.target) && !menu.contains(e.target)){
+    menu.style.display="none";
+  }
+});
+
 function toggleAdmin(){
   const panel=document.getElementById("adminPanel");
   panel.style.display=panel.style.display==="block"?"none":"block";
+  renderStats();
 }
 
 function clearStats(){
   localStorage.removeItem("kioskStats");
+  renderStats();
 }
 
 function changeLang(lang){
@@ -286,3 +353,7 @@ function changeLang(lang){
 }
 
 changeLang("th");
+</script>
+
+</body>
+</html>
