@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Baggage Safety System</title>
+<title>Baggage Safety</title>
 
 <style>
 body{
@@ -12,46 +12,33 @@ body{
   background:#0b1220;
   color:white;
   text-align:center;
-  overflow:hidden;
 }
 
 header{
-  position:fixed;
-  top:0;
-  width:100%;
   background:#111827;
   padding:15px;
-  z-index:10;
+  position:sticky;
+  top:0;
 }
 
-h1{margin:5px 0;color:#00e0ff;}
-.instructions{font-size:16px;margin:6px 0;}
+h1{margin:5px 0;color:#ff2d2d;}
+.instructions{margin:5px 0;}
 
 select{
   padding:6px;
   border-radius:8px;
-  font-size:14px;
 }
 
 .message{
-  margin-top:8px;
-  font-size:18px;
+  margin-top:10px;
   font-weight:bold;
-  min-height:30px;
-  color:#ff4d4d;
-}
-
-.scroll-section{
-  position:absolute;
-  top:220px;
-  bottom:0;
-  width:100%;
-  overflow-y:auto;
+  min-height:40px;
+  font-size:16px;
 }
 
 .card-group{
   display:grid;
-  grid-template-columns:repeat(3,1fr);
+  grid-template-columns:repeat(auto-fit,minmax(180px,1fr));
   gap:20px;
   padding:25px;
 }
@@ -59,27 +46,27 @@ select{
 .card{
   background:#1f2937;
   border-radius:16px;
-  padding:15px;
-  cursor:pointer;
-  transition:0.3s;
-  position:relative;
-  height:200px;              /* ✅ ล็อกความสูงเท่ากัน */
+  height:240px;
   display:flex;
   flex-direction:column;
   justify-content:center;
   align-items:center;
+  cursor:pointer;
+  transition:0.2s;
+  padding:10px;
+  position:relative;
 }
 
 .card img{
-  width:70px;
-  height:70px;
+  width:90px;
+  height:90px;
   object-fit:contain;
 }
 
 .card p{
   margin-top:10px;
   font-size:14px;
-  min-height:40px;           /* ✅ ล็อกพื้นที่ข้อความให้เท่ากัน */
+  min-height:50px;
 }
 
 .card.selected{
@@ -87,12 +74,14 @@ select{
 }
 
 .card.selected::after{
-  content:"❌";
+  content:"✓";
   position:absolute;
   top:8px;
   right:12px;
-  font-size:24px;
+  font-size:20px;
+  font-weight:bold;
 }
+
 </style>
 </head>
 <body>
@@ -107,10 +96,10 @@ select{
     <option value="zh">🇨🇳 中文</option>
     <option value="ja">🇯🇵 日本語</option>
     <option value="ko">🇰🇷 한국어</option>
-    <option value="ru">🇷🇺 Русский</option>
     <option value="es">🇪🇸 Español</option>
     <option value="fr">🇫🇷 Français</option>
     <option value="de">🇩🇪 Deutsch</option>
+    <option value="ru">🇷🇺 Русский</option>
     <option value="ar">🇸🇦 العربية</option>
     <option value="hi">🇮🇳 हिन्दी</option>
   </select>
@@ -118,15 +107,13 @@ select{
   <div class="message" id="message"></div>
 </header>
 
-<div class="scroll-section">
-  <div class="card-group" id="cardContainer"></div>
-</div>
+<div class="card-group" id="cards"></div>
 
 <script>
 
 let currentLang="th";
 
-const itemIcons=[
+const icons=[
 "https://img.icons8.com/fluency/96/power-bank.png",
 "https://img.icons8.com/fluency/96/battery.png",
 "https://img.icons8.com/fluency/96/electronic-cigarette.png",
@@ -135,117 +122,240 @@ const itemIcons=[
 "https://img.icons8.com/fluency/96/dynamite.png",
 "https://img.icons8.com/fluency/96/test-tube.png",
 "https://img.icons8.com/fluency/96/pistol.png",
-"https://img.icons8.com/fluency/96/oxygen-tank.png"
+"https://img.icons8.com/fluency/96/help.png"
 ];
 
-const translations={
+const translations = {
 
 th:{
-title:"ระบบตรวจสอบสัมภาระโหลดใต้เครื่อง",
-instruction:"กรุณาเลือกสิ่งของที่อยู่ในสัมภาระที่ท่านกำลังเช็คอิน",
-items:["พาวเวอร์แบงค์","แบตเตอรี่สำรอง","บุหรี่ไฟฟ้า","โน้ตบุ๊ก","ไฟแช็ก","วัตถุไวไฟ/ระเบิด","สารเคมีอันตราย","อาวุธ/ช็อตไฟฟ้า","ถังออกซิเจน"],
-carry:"ห้ามโหลดใต้เครื่อง ต้องถือขึ้นเครื่องเท่านั้น"
+title:"สิ่งของห้ามโหลดใต้ท้องเครื่อง",
+instruction:"กรุณาเลือกสิ่งของในกระเป๋าที่กำลังโหลด",
+items:[
+"พาวเวอร์แบงค์",
+"แบตเตอรี่สำรอง",
+"บุหรี่ไฟฟ้า",
+"โน้ตบุ๊ก/อุปกรณ์มีแบตลิเธียม",
+"ไฟแช็ก/วัตถุไวไฟ",
+"วัตถุระเบิด",
+"สารเคมีอันตราย",
+"อาวุธปืน/อุปกรณ์ช็อตไฟฟ้า",
+"วัตถุที่ไม่แน่ใจ"
+],
+warning:"ห้ามโหลดใต้เครื่อง ต้องถือขึ้นเครื่องเท่านั้น",
+ask:"โปรดสอบถามเจ้าหน้าที่"
 },
 
 en:{
-title:"Checked Baggage Safety System",
-instruction:"Please select items inside your checked-in baggage",
-items:["Powerbank","Spare Battery","E-Cigarette","Laptop","Lighter","Flammable/Explosive","Hazardous Chemical","Weapon/Taser","Oxygen Tank"],
-carry:"Prohibited in checked baggage. Must be carried on board."
+title:"Prohibited Items in Checked Baggage",
+instruction:"Please select items inside your checked baggage",
+items:[
+"Power Bank",
+"Spare Battery",
+"E-Cigarette",
+"Laptop / Lithium Device",
+"Lighter / Flammable",
+"Explosives",
+"Hazardous Chemical",
+"Firearm / Taser",
+"Unsure Item"
+],
+warning:"Prohibited in checked baggage. Carry-on only.",
+ask:"Please ask airport staff."
 },
 
 zh:{
-title:"托运行李安全系统",
+title:"禁止托运行李物品",
 instruction:"请选择您托运行李中的物品",
-items:["充电宝","备用电池","电子烟","笔记本电脑","打火机","易燃/爆炸物","危险化学品","武器/电击器","氧气瓶"],
-carry:"禁止托运，必须随身携带"
+items:[
+"充电宝",
+"备用电池",
+"电子烟",
+"笔记本/锂电设备",
+"打火机/易燃物",
+"爆炸物",
+"危险化学品",
+"枪支/电击器",
+"不确定物品"
+],
+warning:"禁止托运，必须随身携带",
+ask:"请咨询机场工作人员"
 },
 
 ja:{
-title:"受託手荷物安全システム",
+title:"受託手荷物禁止品",
 instruction:"受託手荷物の中の物品を選択してください",
-items:["モバイルバッテリー","予備バッテリー","電子タバコ","ノートパソコン","ライター","可燃/爆発物","危険化学物質","武器/スタンガン","酸素ボンベ"],
-carry:"受託不可、機内持ち込みのみ"
+items:[
+"モバイルバッテリー",
+"予備バッテリー",
+"電子タバコ",
+"ノートPC/リチウム機器",
+"ライター/可燃物",
+"爆発物",
+"危険化学物質",
+"銃/スタンガン",
+"不明な物"
+],
+warning:"受託不可、機内持ち込みのみ",
+ask:"空港スタッフにお問い合わせください"
 },
 
 ko:{
-title:"위탁 수하물 안전 시스템",
+title:"위탁 수하물 금지 품목",
 instruction:"위탁 수하물 안의 물품을 선택하세요",
-items:["보조배터리","예비 배터리","전자담배","노트북","라이터","인화성/폭발물","위험 화학물질","무기/전기충격기","산소통"],
-carry:"위탁 불가, 기내 반입만 가능"
-},
-
-ru:{
-title:"Система безопасности багажа",
-instruction:"Выберите предметы в зарегистрированном багаже",
-items:["Пауэрбанк","Запасная батарея","Электронная сигарета","Ноутбук","Зажигалка","Легковоспламеняющиеся/взрывчатые","Опасные химикаты","Оружие/шокер","Кислородный баллон"],
-carry:"Запрещено в багаже. Только в ручной клади."
+items:[
+"보조배터리",
+"예비 배터리",
+"전자담배",
+"노트북/리튬기기",
+"라이터/인화성",
+"폭발물",
+"위험 화학물질",
+"총기/전기충격기",
+"확실하지 않은 물품"
+],
+warning:"위탁 금지, 기내 반입만 가능",
+ask:"공항 직원에게 문의하세요"
 },
 
 es:{
-title:"Sistema de Seguridad de Equipaje",
-instruction:"Seleccione artículos en su equipaje facturado",
-items:["Batería externa","Batería de repuesto","Cigarrillo electrónico","Portátil","Encendedor","Inflamable/Explosivo","Químico peligroso","Arma/Taser","Tanque de oxígeno"],
-carry:"Prohibido en equipaje facturado. Solo en cabina."
+title:"Artículos Prohibidos en Equipaje Facturado",
+instruction:"Seleccione los artículos dentro de su equipaje facturado",
+items:[
+"Power Bank",
+"Batería de repuesto",
+"Cigarrillo electrónico",
+"Portátil / Dispositivo de litio",
+"Encendedor / Inflamable",
+"Explosivos",
+"Químico peligroso",
+"Arma / Taser",
+"Artículo dudoso"
+],
+warning:"Prohibido en equipaje facturado. Solo equipaje de mano.",
+ask:"Por favor consulte al personal."
 },
 
 fr:{
-title:"Système de Sécurité des Bagages",
-instruction:"Sélectionnez les articles dans votre bagage enregistré",
-items:["Batterie externe","Batterie de rechange","Cigarette électronique","Ordinateur portable","Briquet","Inflammable/Explosif","Produit chimique dangereux","Arme/Taser","Bouteille d’oxygène"],
-carry:"Interdit en soute. Cabine uniquement."
+title:"Objets Interdits en Bagage Enregistré",
+instruction:"Veuillez sélectionner les objets dans votre bagage enregistré",
+items:[
+"Batterie externe",
+"Batterie de rechange",
+"Cigarette électronique",
+"Ordinateur / appareil lithium",
+"Briquet / inflammable",
+"Explosifs",
+"Produit chimique dangereux",
+"Arme / Taser",
+"Objet incertain"
+],
+warning:"Interdit en soute. Bagage cabine uniquement.",
+ask:"Veuillez demander au personnel."
 },
 
 de:{
-title:"Gepäck-Sicherheitssystem",
-instruction:"Wählen Sie Gegenstände im aufgegebenen Gepäck",
-items:["Powerbank","Ersatzbatterie","E-Zigarette","Laptop","Feuerzeug","Entflammbar/Explosiv","Gefährliche Chemikalie","Waffe/Taser","Sauerstoffflasche"],
-carry:"Im Aufgabegepäck verboten. Nur Handgepäck."
+title:"Verbotene Gegenstände im Aufgabegepäck",
+instruction:"Bitte wählen Sie Gegenstände im aufgegebenen Gepäck",
+items:[
+"Powerbank",
+"Ersatzbatterie",
+"E-Zigarette",
+"Laptop / Lithiumgerät",
+"Feuerzeug / Entflammbar",
+"Explosivstoffe",
+"Gefährliche Chemikalie",
+"Waffe / Taser",
+"Unsicherer Gegenstand"
+],
+warning:"Im Aufgabegepäck verboten. Nur Handgepäck.",
+ask:"Bitte Personal fragen."
+},
+
+ru:{
+title:"Запрещенные предметы в багаже",
+instruction:"Выберите предметы в вашем зарегистрированном багаже",
+items:[
+"Пауэрбанк",
+"Запасная батарея",
+"Электронная сигарета",
+"Ноутбук / литиевое устройство",
+"Зажигалка / воспламеняемое",
+"Взрывчатые вещества",
+"Опасные химикаты",
+"Оружие / электрошокер",
+"Неуверенный предмет"
+],
+warning:"Запрещено в багаже. Только ручная кладь.",
+ask:"Пожалуйста, спросите сотрудника."
 },
 
 ar:{
-title:"نظام فحص الأمتعة",
-instruction:"يرجى اختيار العناصر في أمتعتك المسجلة",
-items:["باور بانك","بطارية احتياطية","سيجارة إلكترونية","كمبيوتر محمول","ولاعة","مواد قابلة للاشتعال/متفجرة","مواد كيميائية خطرة","سلاح/صاعق كهربائي","أسطوانة أكسجين"],
-carry:"ممنوع في الأمتعة المسجلة. يُحمل في المقصورة فقط."
+title:"مواد محظورة في الأمتعة المسجلة",
+instruction:"يرجى اختيار العناصر داخل أمتعتك المسجلة",
+items:[
+"باور بنك",
+"بطارية احتياطية",
+"سيجارة إلكترونية",
+"كمبيوتر محمول / جهاز ليثيوم",
+"ولاعة / مادة قابلة للاشتعال",
+"مواد متفجرة",
+"مواد كيميائية خطرة",
+"سلاح / صاعق كهربائي",
+"عنصر غير مؤكد"
+],
+warning:"ممنوع في الأمتعة المسجلة. فقط حمل يدوي.",
+ask:"يرجى سؤال الموظف."
 },
 
 hi:{
-title:"चेक-इन सामान सुरक्षा प्रणाली",
-instruction:"अपने चेक-इन किए गए बैग में मौजूद वस्तुओं का चयन करें",
-items:["पावर बैंक","स्पेयर बैटरी","ई-सिगरेट","लैपटॉप","लाइटर","ज्वलनशील/विस्फोटक","खतरनाक रसायन","हथियार/टेज़र","ऑक्सीजन टैंक"],
-carry:"चेक-इन बैग में प्रतिबंधित। केवल केबिन में ले जाएँ।"
+title:"चेक-इन बैगेज में प्रतिबंधित वस्तुएँ",
+instruction:"कृपया अपने चेक-इन बैगेज में मौजूद वस्तु चुनें",
+items:[
+"पावर बैंक",
+"अतिरिक्त बैटरी",
+"ई-सिगरेट",
+"लैपटॉप / लिथियम डिवाइस",
+"लाइटर / ज्वलनशील",
+"विस्फोटक",
+"खतरनाक रसायन",
+"हथियार / टेसर",
+"अनिश्चित वस्तु"
+],
+warning:"चेक-इन में प्रतिबंधित। केवल केबिन बैगेज।",
+ask:"कृपया स्टाफ से पूछें।"
 }
 
 };
 
-const container=document.getElementById("cardContainer");
-
 function renderCards(){
-  container.innerHTML="";
-  translations[currentLang].items.forEach((item,index)=>{
-    const card=document.createElement("div");
-    card.className="card";
-    card.innerHTML=`
-      <img src="${itemIcons[index]}">
-      <p>${item}</p>
-    `;
-    card.onclick=()=>{
-      card.classList.toggle("selected");
-      document.getElementById("message").innerText=
-        translations[currentLang].carry;
-    };
-    container.appendChild(card);
-  });
+const container=document.getElementById("cards");
+container.innerHTML="";
+translations[currentLang].items.forEach((item,index)=>{
+const card=document.createElement("div");
+card.className="card";
+card.innerHTML=`<img src="${icons[index]}"><p>${item}</p>`;
+card.onclick=()=>selectItem(index,card);
+container.appendChild(card);
+});
+}
+
+function selectItem(index,card){
+document.querySelectorAll(".card").forEach(c=>c.classList.remove("selected"));
+card.classList.add("selected");
+
+if(index===8){
+document.getElementById("message").innerText=translations[currentLang].ask;
+}else{
+document.getElementById("message").innerText=translations[currentLang].warning;
+}
 }
 
 function changeLang(lang){
-  currentLang=lang;
-  document.getElementById("title").innerText=translations[lang].title;
-  document.getElementById("instruction").innerText=translations[lang].instruction;
-  document.getElementById("message").innerText="";
-  document.body.dir=(lang==="ar")?"rtl":"ltr";
-  renderCards();  // ✅ รีเฟรชการ์ดให้เปลี่ยนภาษาใต้รูป
+currentLang=lang;
+document.getElementById("title").innerText=translations[lang].title;
+document.getElementById("instruction").innerText=translations[lang].instruction;
+document.getElementById("message").innerText="";
+renderCards();
 }
 
 changeLang("th");
