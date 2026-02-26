@@ -17,6 +17,9 @@ body{
 header{
   background:#111827;
   padding:20px;
+  position:sticky;
+  top:0;
+  z-index:10;
 }
 
 h1{margin:5px 0;color:#ff2d2d;font-size:26px;}
@@ -41,39 +44,62 @@ button{
   font-weight:bold;
   min-height:50px;
   font-size:20px;
+  transition:0.3s;
+}
+
+.message.alert{
+  color:#ff3b3b;
+  animation:blink 0.6s infinite alternate;
+}
+
+@keyframes blink{
+  from{opacity:1;}
+  to{opacity:0.5;}
 }
 
 .card-group{
   display:grid;
   grid-template-columns:repeat(auto-fit,minmax(200px,1fr));
-  gap:20px;
+  gap:25px;
   padding:30px;
 }
 
 .card{
   background:#1f2937;
   border-radius:20px;
-  height:300px;
+  height:260px;
   display:flex;
   flex-direction:column;
   justify-content:center;
   align-items:center;
   cursor:pointer;
-  padding:15px;
   transition:0.3s;
+  padding:15px;
+  position:relative;
 }
 
 .card:hover{transform:scale(1.05);}
-.card.selected{background:#b91c1c;}
 
 .card svg{
-  width:80px;
-  height:80px;
+  width:90px;
+  height:90px;
   fill:white;
 }
 
 .card p{
-  margin-top:15px;
+  margin-top:12px;
+  min-height:60px;
+}
+
+.card.selected{background:#b91c1c;}
+
+.card.selected::after{
+  content:"✓";
+  position:absolute;
+  top:10px;
+  right:15px;
+  font-size:24px;
+  font-weight:bold;
 }
 </style>
 </head>
@@ -98,6 +124,7 @@ button{
   </select>
 
   <button onclick="resetAll()">Reset</button>
+  <button onclick="document.documentElement.requestFullscreen()">Full Screen</button>
 
   <div class="message" id="message"></div>
 </header>
@@ -106,28 +133,69 @@ button{
 
 <script>
 let currentLang="th";
+let selectedIndex=null;
+let resetTimer=null;
+
+const alertSound=new Audio("https://actions.google.com/sounds/v1/alarms/beep_short.ogg");
+const infoSound=new Audio("https://actions.google.com/sounds/v1/cartoon/wood_plank_flicks.ogg");
 
 const icons=[
-`<svg viewBox="0 0 64 64"><rect x="18" y="20" width="28" height="20" rx="4"/></svg>`,
-`<svg viewBox="0 0 64 64"><rect x="20" y="18" width="24" height="28" rx="4"/></svg>`,
-`<svg viewBox="0 0 64 64"><circle cx="32" cy="32" r="18"/></svg>`,
-`<svg viewBox="0 0 64 64"><rect x="14" y="18" width="36" height="24" rx="3"/></svg>`,
-`<svg viewBox="0 0 64 64"><polygon points="32,8 56,56 8,56"/></svg>`,
-`<svg viewBox="0 0 64 64"><circle cx="32" cy="32" r="20"/></svg>`,
-`<svg viewBox="0 0 64 64"><rect x="18" y="28" width="28" height="8"/></svg>`,
-`<svg viewBox="0 0 64 64"><rect x="28" y="18" width="8" height="28"/></svg>`,
-`<svg viewBox="0 0 64 64"><circle cx="32" cy="32" r="22"/></svg>`
+`<svg viewBox="0 0 24 24"><rect x="6" y="4" width="12" height="16" rx="2"/></svg>`,
+`<svg viewBox="0 0 24 24"><rect x="7" y="5" width="10" height="14" rx="2"/></svg>`,
+`<svg viewBox="0 0 24 24"><rect x="4" y="6" width="16" height="10" rx="2"/></svg>`,
+`<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"/></svg>`,
+`<svg viewBox="0 0 24 24"><path d="M12 2l4 8-4 12-4-12z"/></svg>`,
+`<svg viewBox="0 0 24 24"><rect x="6" y="10" width="12" height="6"/></svg>`,
+`<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/></svg>`,
+`<svg viewBox="0 0 24 24"><rect x="10" y="2" width="4" height="10"/></svg>`,
+`<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="5"/></svg>`
 ];
 
-const translations={
+const translations = {
 th:{title:"สิ่งของห้ามโหลดใต้ท้องเครื่อง",instruction:"กรุณาเลือกสิ่งของในกระเป๋าที่กำลังโหลด",
-items:["พาวเวอร์แบงค์","แบตเตอรี่สำรอง","บุหรี่ไฟฟ้า","โน้ตบุ๊ก/ลิเธียม","ไฟแช็ก/วัตถุไวไฟ","วัตถุระเบิด","สารเคมีอันตราย","อาวุธ/อุปกรณ์ไฟฟ้า","วัตถุที่ไม่แน่ใจ"],
+items:["พาวเวอร์แบงค์","แบตเตอรี่สำรอง","บุหรี่ไฟฟ้า","โน้ตบุ๊ก/อุปกรณ์ลิเธียม","ไฟแช็ก/วัตถุไวไฟ","วัตถุระเบิด","สารเคมีอันตราย","อาวุธ/อุปกรณ์ช็อตไฟฟ้า","วัตถุที่ไม่แน่ใจ"],
 warning:"❌ ห้ามโหลดใต้เครื่อง ต้องถือขึ้นเครื่องเท่านั้น",
 ask:"⚠ โปรดสอบถามเจ้าหน้าที่"},
 en:{title:"Prohibited Items in Checked Baggage",instruction:"Select items inside your checked baggage",
-items:["Power Bank","Spare Battery","E-Cigarette","Laptop","Lighter","Explosives","Hazardous Chemical","Weapon","Unsure Item"],
-warning:"❌ Prohibited in checked baggage.",
-ask:"⚠ Please ask airport staff."}
+items:["Power Bank","Spare Battery","E-Cigarette","Laptop / Lithium Device","Lighter / Flammable","Explosives","Hazardous Chemical","Firearm / Taser","Unsure Item"],
+warning:"❌ Prohibited in checked baggage. Carry-on only.",
+ask:"⚠ Please ask airport staff."},
+zh:{title:"禁止托运行李物品",instruction:"请选择托运行李中的物品",
+items:["充电宝","备用电池","电子烟","笔记本/锂设备","打火机/易燃物","爆炸物","危险化学品","枪支/电击器","不确定物品"],
+warning:"❌ 禁止托运，必须随身携带",
+ask:"⚠ 请咨询工作人员"},
+ja:{title:"受託手荷物禁止品",instruction:"受託手荷物の中の物品を選択してください",
+items:["モバイルバッテリー","予備バッテリー","電子タバコ","ノートPC/リチウム機器","ライター/可燃物","爆発物","危険化学物質","銃/スタンガン","不明な物"],
+warning:"❌ 受託不可、機内持ち込みのみ",
+ask:"⚠ スタッフにお問い合わせください"},
+ko:{title:"위탁 수하물 금지 품목",instruction:"위탁 수하물 안의 물품을 선택하세요",
+items:["보조배터리","예비 배터리","전자담배","노트북/리튬기기","라이터/인화성","폭발물","위험 화학물질","총기/전기충격기","확실하지 않은 물품"],
+warning:"❌ 위탁 금지, 기내 반입만 가능",
+ask:"⚠ 직원에게 문의하세요"},
+es:{title:"Artículos Prohibidos",instruction:"Seleccione artículos en su equipaje facturado",
+items:["Power Bank","Batería extra","Cigarrillo electrónico","Portátil / Litio","Encendedor","Explosivos","Químico peligroso","Arma / Taser","Artículo dudoso"],
+warning:"❌ Prohibido en equipaje facturado.",
+ask:"⚠ Consulte al personal"},
+fr:{title:"Objets Interdits",instruction:"Sélectionnez les objets dans votre bagage",
+items:["Batterie externe","Batterie de rechange","Cigarette électronique","Ordinateur / Lithium","Briquet","Explosifs","Produit chimique","Arme / Taser","Objet incertain"],
+warning:"❌ Interdit en soute.",
+ask:"⚠ Demandez au personnel"},
+de:{title:"Verbotene Gegenstände",instruction:"Wählen Sie Gegenstände im Gepäck",
+items:["Powerbank","Ersatzbatterie","E-Zigarette","Laptop / Lithium","Feuerzeug","Explosivstoffe","Chemikalie","Waffe / Taser","Unsicherer Gegenstand"],
+warning:"❌ Im Aufgabegepäck verboten.",
+ask:"⚠ Bitte Personal fragen"},
+ru:{title:"Запрещенные предметы",instruction:"Выберите предмет в багаже",
+items:["Пауэрбанк","Запасная батарея","Электронная сигарета","Ноутбук / Литий","Зажигалка","Взрывчатка","Химикат","Оружие / Шокер","Неуверенный предмет"],
+warning:"❌ Запрещено в багаже.",
+ask:"⚠ Спросите сотрудника"},
+ar:{title:"مواد محظورة",instruction:"اختر العناصر في الأمتعة",
+items:["باور بنك","بطارية إضافية","سيجارة إلكترونية","كمبيوتر / ليثيوم","ولاعة","متفجرات","مواد كيميائية","سلاح / صاعق","عنصر غير مؤكد"],
+warning:"❌ ممنوع في الأمتعة المسجلة.",
+ask:"⚠ اسأل الموظف"},
+hi:{title:"प्रतिबंधित वस्तुएँ",instruction:"अपने चेक-इन बैगेज की वस्तु चुनें",
+items:["पावर बैंक","अतिरिक्त बैटरी","ई-सिगरेट","लैपटॉप / लिथियम","लाइटर","विस्फोटक","रसायन","हथियार / टेसर","अनिश्चित वस्तु"],
+warning:"❌ चेक-इन में प्रतिबंधित।",
+ask:"⚠ स्टाफ से पूछें"}
 };
 
 function renderCards(){
@@ -143,26 +211,38 @@ container.appendChild(card);
 }
 
 function selectItem(index){
+selectedIndex=index;
 renderCards();
 document.querySelectorAll(".card")[index].classList.add("selected");
 
+const msg=document.getElementById("message");
+msg.classList.remove("alert");
+
 if(index===8){
-document.getElementById("message").innerText=translations[currentLang].ask;
+msg.innerText=translations[currentLang].ask;
+infoSound.play();
 }else{
-document.getElementById("message").innerText=translations[currentLang].warning;
+msg.innerText=translations[currentLang].warning;
+msg.classList.add("alert");
+alertSound.play();
 }
+
+clearTimeout(resetTimer);
+resetTimer=setTimeout(resetAll,20000);
 }
 
 function resetAll(){
+selectedIndex=null;
 document.getElementById("message").innerText="";
+document.getElementById("message").classList.remove("alert");
 renderCards();
 }
 
 function changeLang(lang){
 currentLang=lang;
+resetAll();
 document.getElementById("title").innerText=translations[lang].title;
 document.getElementById("instruction").innerText=translations[lang].instruction;
-renderCards();
 }
 
 changeLang("th");
