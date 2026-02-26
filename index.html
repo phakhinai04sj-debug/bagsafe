@@ -17,9 +17,6 @@ body{
 header{
   background:#111827;
   padding:20px;
-  position:sticky;
-  top:0;
-  z-index:10;
 }
 
 h1{margin:5px 0;color:#ff2d2d;font-size:26px;}
@@ -44,63 +41,39 @@ button{
   font-weight:bold;
   min-height:50px;
   font-size:20px;
-  transition:0.3s;
-}
-
-.message.alert{
-  color:#ff3b3b;
-  animation:blink 0.6s infinite alternate;
-}
-
-@keyframes blink{
-  from{opacity:1;}
-  to{opacity:0.5;}
 }
 
 .card-group{
   display:grid;
   grid-template-columns:repeat(auto-fit,minmax(200px,1fr));
-  gap:25px;
+  gap:20px;
   padding:30px;
 }
 
 .card{
   background:#1f2937;
   border-radius:20px;
-  height:330px;
+  height:300px;
   display:flex;
   flex-direction:column;
   justify-content:center;
   align-items:center;
   cursor:pointer;
-  transition:0.3s;
   padding:15px;
-  position:relative;
+  transition:0.3s;
 }
 
 .card:hover{transform:scale(1.05);}
+.card.selected{background:#b91c1c;}
 
 .card svg{
   width:80px;
   height:80px;
   fill:white;
-  margin-bottom:8px;
 }
 
 .card p{
-  margin-top:10px;
-  min-height:60px;
-}
-
-.card.selected{background:#b91c1c;}
-
-.card.selected::after{
-  content:"✓";
-  position:absolute;
-  top:10px;
-  right:15px;
-  font-size:24px;
-  font-weight:bold;
+  margin-top:15px;
 }
 </style>
 </head>
@@ -125,7 +98,6 @@ button{
   </select>
 
   <button onclick="resetAll()">Reset</button>
-  <button onclick="document.documentElement.requestFullscreen()">Full Screen</button>
 
   <div class="message" id="message"></div>
 </header>
@@ -134,27 +106,29 @@ button{
 
 <script>
 let currentLang="th";
-let selectedIndex=null;
-let resetTimer=null;
 
-const alertSound=new Audio("https://actions.google.com/sounds/v1/alarms/beep_short.ogg");
-const infoSound=new Audio("https://actions.google.com/sounds/v1/cartoon/wood_plank_flicks.ogg");
-
-/* ไอคอน + รูปประกอบ (SVG ภายในไฟล์ ไม่พึ่งอินเทอร์เน็ต) */
 const icons=[
-`<svg viewBox="0 0 64 64"><rect x="18" y="20" width="28" height="20" rx="4"/><rect x="26" y="14" width="12" height="6" rx="2"/></svg>`,
+`<svg viewBox="0 0 64 64"><rect x="18" y="20" width="28" height="20" rx="4"/></svg>`,
 `<svg viewBox="0 0 64 64"><rect x="20" y="18" width="24" height="28" rx="4"/></svg>`,
-`<svg viewBox="0 0 64 64"><circle cx="32" cy="32" r="18"/><rect x="28" y="18" width="8" height="20"/></svg>`,
+`<svg viewBox="0 0 64 64"><circle cx="32" cy="32" r="18"/></svg>`,
 `<svg viewBox="0 0 64 64"><rect x="14" y="18" width="36" height="24" rx="3"/></svg>`,
-`<svg viewBox="0 0 64 64"><path d="M28 10h8v20h-8z"/><circle cx="32" cy="42" r="6"/></svg>`,
 `<svg viewBox="0 0 64 64"><polygon points="32,8 56,56 8,56"/></svg>`,
-`<svg viewBox="0 0 64 64"><circle cx="32" cy="32" r="20"/><circle cx="32" cy="32" r="10" fill="#0b1220"/></svg>`,
-`<svg viewBox="0 0 64 64"><rect x="18" y="28" width="28" height="8"/><rect x="28" y="18" width="8" height="28"/></svg>`,
-`<svg viewBox="0 0 64 64"><circle cx="32" cy="32" r="22"/><text x="32" y="38" font-size="20" text-anchor="middle" fill="#0b1220">?</text></svg>`
+`<svg viewBox="0 0 64 64"><circle cx="32" cy="32" r="20"/></svg>`,
+`<svg viewBox="0 0 64 64"><rect x="18" y="28" width="28" height="8"/></svg>`,
+`<svg viewBox="0 0 64 64"><rect x="28" y="18" width="8" height="28"/></svg>`,
+`<svg viewBox="0 0 64 64"><circle cx="32" cy="32" r="22"/></svg>`
 ];
 
-/* ใช้ translations ของคุณเหมือนเดิมทั้งหมด */
-const translations = {/* ใส่ translations เดิมของคุณตรงนี้ */};
+const translations={
+th:{title:"สิ่งของห้ามโหลดใต้ท้องเครื่อง",instruction:"กรุณาเลือกสิ่งของในกระเป๋าที่กำลังโหลด",
+items:["พาวเวอร์แบงค์","แบตเตอรี่สำรอง","บุหรี่ไฟฟ้า","โน้ตบุ๊ก/ลิเธียม","ไฟแช็ก/วัตถุไวไฟ","วัตถุระเบิด","สารเคมีอันตราย","อาวุธ/อุปกรณ์ไฟฟ้า","วัตถุที่ไม่แน่ใจ"],
+warning:"❌ ห้ามโหลดใต้เครื่อง ต้องถือขึ้นเครื่องเท่านั้น",
+ask:"⚠ โปรดสอบถามเจ้าหน้าที่"},
+en:{title:"Prohibited Items in Checked Baggage",instruction:"Select items inside your checked baggage",
+items:["Power Bank","Spare Battery","E-Cigarette","Laptop","Lighter","Explosives","Hazardous Chemical","Weapon","Unsure Item"],
+warning:"❌ Prohibited in checked baggage.",
+ask:"⚠ Please ask airport staff."}
+};
 
 function renderCards(){
 const container=document.getElementById("cards");
@@ -169,38 +143,26 @@ container.appendChild(card);
 }
 
 function selectItem(index){
-selectedIndex=index;
 renderCards();
 document.querySelectorAll(".card")[index].classList.add("selected");
 
-const msg=document.getElementById("message");
-msg.classList.remove("alert");
-
 if(index===8){
-msg.innerText=translations[currentLang].ask;
-infoSound.play();
+document.getElementById("message").innerText=translations[currentLang].ask;
 }else{
-msg.innerText=translations[currentLang].warning;
-msg.classList.add("alert");
-alertSound.play();
+document.getElementById("message").innerText=translations[currentLang].warning;
 }
-
-clearTimeout(resetTimer);
-resetTimer=setTimeout(resetAll,20000);
 }
 
 function resetAll(){
-selectedIndex=null;
 document.getElementById("message").innerText="";
-document.getElementById("message").classList.remove("alert");
 renderCards();
 }
 
 function changeLang(lang){
 currentLang=lang;
-resetAll();
 document.getElementById("title").innerText=translations[lang].title;
 document.getElementById("instruction").innerText=translations[lang].instruction;
+renderCards();
 }
 
 changeLang("th");
