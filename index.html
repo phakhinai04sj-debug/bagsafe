@@ -3,25 +3,24 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Checked Baggage Safety</title>
+<title>Baggage Safety System</title>
 
 <style>
 body{
   margin:0;
   font-family:Arial, sans-serif;
-  background:#0a0f1a;
+  background:#0b1220;
   color:white;
   text-align:center;
   overflow:hidden;
 }
 
-/* HEADER */
 header{
   position:fixed;
   top:0;
   width:100%;
   background:#111827;
-  padding:12px;
+  padding:15px;
   z-index:10;
   box-shadow:0 4px 10px rgba(0,0,0,0.4);
 }
@@ -29,32 +28,23 @@ header{
 h1{
   margin:5px 0;
   color:#00e0ff;
-  font-size:20px;
 }
 
 .instructions{
-  font-size:15px;
+  font-size:16px;
   margin:6px 0;
 }
 
-select{
-  padding:6px;
-  border-radius:8px;
-  font-size:14px;
-}
-
 .message{
-  margin-top:6px;
-  font-size:17px;
-  min-height:24px;
-  color:#00ff99;
+  margin-top:8px;
+  font-size:18px;
   font-weight:bold;
+  min-height:30px;
 }
 
-/* SCROLL AREA */
 .scroll-section{
   position:absolute;
-  top:190px;
+  top:170px;
   bottom:0;
   width:100%;
   overflow-y:auto;
@@ -63,49 +53,40 @@ select{
 .card-group{
   display:grid;
   grid-template-columns:repeat(3,1fr);
-  grid-template-rows:repeat(2,1fr);
-  gap:15px;
-  padding:20px;
+  gap:20px;
+  padding:25px;
 }
 
-/* CARD FLIP */
 .card{
-  perspective:1000px;
-}
-
-.card-inner{
-  position:relative;
-  width:100%;
-  height:130px;
-  transition:transform 0.6s;
-  transform-style:preserve-3d;
-}
-
-.card.flipped .card-inner{
-  transform:rotateY(180deg);
-}
-
-.card-front,.card-back{
-  position:absolute;
-  width:100%;
-  height:100%;
-  border-radius:14px;
-  display:flex;
-  justify-content:center;
-  align-items:center;
-  padding:10px;
-  backface-visibility:hidden;
-  font-size:15px;
-}
-
-.card-front{
   background:#1f2937;
+  border-radius:16px;
+  padding:15px;
+  cursor:pointer;
+  transition:0.3s;
+  position:relative;
 }
 
-.card-back{
-  background:#00b894;
-  transform:rotateY(180deg);
-  font-size:18px;
+.card img{
+  width:70px;
+  height:70px;
+  object-fit:contain;
+}
+
+.card p{
+  margin-top:8px;
+  font-size:14px;
+}
+
+.card.selected{
+  background:#b91c1c;
+}
+
+.card.selected::after{
+  content:"❌";
+  position:absolute;
+  top:8px;
+  right:12px;
+  font-size:24px;
 }
 
 </style>
@@ -113,26 +94,10 @@ select{
 <body>
 
 <header>
-  <h1 id="title">Checked Baggage Safety</h1>
-
-  <div class="instructions" id="instructionText">
-    กรุณาเลือกอุปกรณ์ที่อยู่ในกระเป๋าที่กำลังโหลดใต้เครื่องของคุณ
+  <h1>ระบบตรวจสอบสัมภาระโหลดใต้เครื่อง</h1>
+  <div class="instructions">
+    กรุณาเลือกสิ่งของที่อยู่ในสัมภาระที่ท่านกำลังเช็คอิน
   </div>
-
-  <select onchange="changeLang(this.value)">
-    <option value="th">🇹🇭 ไทย</option>
-    <option value="en">🇺🇸 English</option>
-    <option value="zh">🇨🇳 中文</option>
-    <option value="ja">🇯🇵 日本語</option>
-    <option value="ko">🇰🇷 한국어</option>
-    <option value="ru">🇷🇺 Русский</option>
-    <option value="es">🇪🇸 Español</option>
-    <option value="fr">🇫🇷 Français</option>
-    <option value="de">🇩🇪 Deutsch</option>
-    <option value="ar">🇸🇦 العربية</option>
-    <option value="hi">🇮🇳 हिन्दी</option>
-  </select>
-
   <div class="message" id="message"></div>
 </header>
 
@@ -142,95 +107,82 @@ select{
 
 <script>
 
-let currentLang="th";
+const items = [
 
-/* ===== TRANSLATIONS ===== */
-const translations={
-th:{
-title:"ระบบตรวจสอบสัมภาระโหลดใต้เครื่อง",
-instruction:"กรุณาเลือกอุปกรณ์ที่อยู่ในกระเป๋าที่กำลังโหลดใต้เครื่องของคุณ",
-items:{
-powerbank:"พาวเวอร์แบงค์",
-battery:"แบตเตอรี่ลิเธียม",
-laptop:"แล็ปท็อป",
-phone:"โทรศัพท์",
-tablet:"แท็บเล็ต",
-camera:"กล้อง"
+{
+name:"พาวเวอร์แบงค์",
+img:"https://img.icons8.com/fluency/96/power-bank.png",
+message:"ห้ามโหลดใต้เครื่อง ต้องถือขึ้นเครื่องเท่านั้น"
 },
-messages:{
-powerbank:"ต้องนำติดตัวขึ้นเครื่องเท่านั้น",
-battery:"ต้องแจ้งเจ้าหน้าที่ก่อนโหลด",
-laptop:"ควรนำออกจากกระเป๋า",
-phone:"สามารถบรรจุได้",
-tablet:"ต้องผ่านการตรวจสอบ",
-camera:"สามารถบรรจุได้"
-}
-},
-en:{
-title:"Checked Baggage Safety System",
-instruction:"Please select items inside your checked baggage",
-items:{
-powerbank:"Powerbank",
-battery:"Lithium Battery",
-laptop:"Laptop",
-phone:"Mobile Phone",
-tablet:"Tablet",
-camera:"Camera"
-},
-messages:{
-powerbank:"Must be carried on board only",
-battery:"Must be declared before check-in",
-laptop:"Should be removed from bag",
-phone:"Allowed",
-tablet:"Subject to inspection",
-camera:"Allowed"
-}
-}
-};
 
-/* ===== CREATE CARDS ===== */
-const itemKeys=["powerbank","battery","laptop","phone","tablet","camera"];
+{
+name:"แบตเตอรี่สำรอง",
+img:"https://img.icons8.com/fluency/96/battery.png",
+message:"ห้ามโหลดใต้เครื่อง ต้องถือขึ้นเครื่องเท่านั้น"
+},
+
+{
+name:"บุหรี่ไฟฟ้า",
+img:"https://img.icons8.com/fluency/96/electronic-cigarette.png",
+message:"ห้ามโหลดใต้เครื่อง ต้องถือขึ้นเครื่องเท่านั้น"
+},
+
+{
+name:"โน้ตบุ๊ก",
+img:"https://img.icons8.com/fluency/96/laptop.png",
+message:"อุปกรณ์ที่มีแบตเตอรี่ลิเธียม ต้องถือขึ้นเครื่อง"
+},
+
+{
+name:"ไฟแช็ก",
+img:"https://img.icons8.com/fluency/96/lighter.png",
+message:"วัตถุไวไฟ ห้ามโหลดใต้เครื่อง"
+},
+
+{
+name:"วัตถุไวไฟ/ระเบิด",
+img:"https://img.icons8.com/fluency/96/dynamite.png",
+message:"ห้ามโหลดใต้เครื่องโดยเด็ดขาด"
+},
+
+{
+name:"สารเคมีอันตราย",
+img:"https://img.icons8.com/fluency/96/test-tube.png",
+message:"ห้ามโหลดใต้เครื่อง"
+},
+
+{
+name:"อาวุธปืน/อุปกรณ์ช็อตไฟฟ้า",
+img:"https://img.icons8.com/fluency/96/pistol.png",
+message:"ห้ามโหลดใต้เครื่อง"
+},
+
+{
+name:"ถังออกซิเจน",
+img:"https://img.icons8.com/fluency/96/oxygen-tank.png",
+message:"ต้องได้รับอนุญาตพิเศษก่อนเดินทาง"
+}
+
+];
+
 const container=document.getElementById("cardContainer");
+const messageBox=document.getElementById("message");
 
-function renderCards(){
-  container.innerHTML="";
-  itemKeys.forEach(key=>{
-    const card=document.createElement("div");
-    card.className="card";
-    card.innerHTML=`
-      <div class="card-inner">
-        <div class="card-front">${translations[currentLang].items[key]}</div>
-        <div class="card-back">✓</div>
-      </div>
-    `;
-    card.onclick=()=>flipCard(card,key);
-    container.appendChild(card);
-  });
-}
+items.forEach((item,index)=>{
+  const card=document.createElement("div");
+  card.className="card";
+  card.innerHTML=`
+    <img src="${item.img}">
+    <p>${item.name}</p>
+  `;
 
-function changeLang(lang){
-  currentLang=lang;
+  card.onclick=()=>{
+    card.classList.toggle("selected");
+    messageBox.innerText=item.message;
+  };
 
-  document.getElementById("title").innerText=translations[lang].title;
-  document.getElementById("instructionText").innerText=translations[lang].instruction;
-  document.getElementById("message").innerText="";
-
-  if(lang==="ar"){
-    document.body.dir="rtl";
-  }else{
-    document.body.dir="ltr";
-  }
-
-  renderCards();
-}
-
-function flipCard(card,key){
-  card.classList.toggle("flipped");
-  document.getElementById("message").innerText=
-    translations[currentLang].messages[key];
-}
-
-renderCards();
+  container.appendChild(card);
+});
 
 </script>
 
