@@ -3,37 +3,38 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Bag Safe</title>
+<title>Checked Baggage Safety</title>
 
 <style>
 body{
   margin:0;
   font-family:Arial, sans-serif;
-  background:#000;
+  background:#0a0f1a;
   color:white;
   text-align:center;
   overflow:hidden;
 }
 
-/* ===== HEADER ===== */
+/* HEADER */
 header{
   position:fixed;
   top:0;
   width:100%;
-  background:#000;
-  padding:10px;
+  background:#111827;
+  padding:12px;
   z-index:10;
+  box-shadow:0 4px 10px rgba(0,0,0,0.4);
 }
 
 h1{
-  color:#00ffcc;
   margin:5px 0;
+  color:#00e0ff;
+  font-size:20px;
 }
 
 .instructions{
-  font-size:16px;
-  margin:5px 0;
-  color:#fff;
+  font-size:15px;
+  margin:6px 0;
 }
 
 select{
@@ -43,33 +44,31 @@ select{
 }
 
 .message{
-  margin-top:5px;
-  font-size:18px;
-  min-height:25px;
-  color:#00ffcc;
+  margin-top:6px;
+  font-size:17px;
+  min-height:24px;
+  color:#00ff99;
+  font-weight:bold;
 }
 
-/* ===== SCROLL ===== */
+/* SCROLL AREA */
 .scroll-section{
   position:absolute;
-  top:160px;
+  top:190px;
   bottom:0;
   width:100%;
   overflow-y:auto;
-  scroll-snap-type:y mandatory;
 }
 
 .card-group{
-  height:420px;
   display:grid;
-  grid-template-columns:repeat(3, 1fr);
-  grid-template-rows:repeat(2, 1fr);
+  grid-template-columns:repeat(3,1fr);
+  grid-template-rows:repeat(2,1fr);
   gap:15px;
-  padding:15px;
-  scroll-snap-align:start;
+  padding:20px;
 }
 
-/* ===== CARD FLIP ===== */
+/* CARD FLIP */
 .card{
   perspective:1000px;
 }
@@ -77,7 +76,7 @@ select{
 .card-inner{
   position:relative;
   width:100%;
-  height:100%;
+  height:130px;
   transition:transform 0.6s;
   transform-style:preserve-3d;
 }
@@ -86,31 +85,27 @@ select{
   transform:rotateY(180deg);
 }
 
-.card-front, .card-back{
+.card-front,.card-back{
   position:absolute;
   width:100%;
   height:100%;
-  border-radius:15px;
+  border-radius:14px;
   display:flex;
-  flex-direction:column;
   justify-content:center;
   align-items:center;
+  padding:10px;
   backface-visibility:hidden;
+  font-size:15px;
 }
 
 .card-front{
-  background:#222;
+  background:#1f2937;
 }
 
 .card-back{
-  background:#00cc66;
+  background:#00b894;
   transform:rotateY(180deg);
-  color:white;
-}
-
-.card img{
-  width:40px;
-  margin-bottom:8px;
+  font-size:18px;
 }
 
 </style>
@@ -118,124 +113,124 @@ select{
 <body>
 
 <header>
-  <h1>Bag Safe</h1>
+  <h1 id="title">Checked Baggage Safety</h1>
+
   <div class="instructions" id="instructionText">
-    โปรดเลือกอุปกรณ์ที่มีอยู่ในกระเป๋าคุณ
+    กรุณาเลือกอุปกรณ์ที่อยู่ในกระเป๋าที่กำลังโหลดใต้เครื่องของคุณ
   </div>
 
   <select onchange="changeLang(this.value)">
-    <option value="th">ไทย</option>
-    <option value="en">English</option>
-    <option value="zh">中文</option>
-    <option value="ja">日本語</option>
-    <option value="ko">한국어</option>
-    <option value="ru">Русский</option>
-    <option value="es">Español</option>
-    <option value="fr">Français</option>
-    <option value="de">Deutsch</option>
-    <option value="ar">العربية</option>
-    <option value="hi">हिन्दी</option>
+    <option value="th">🇹🇭 ไทย</option>
+    <option value="en">🇺🇸 English</option>
+    <option value="zh">🇨🇳 中文</option>
+    <option value="ja">🇯🇵 日本語</option>
+    <option value="ko">🇰🇷 한국어</option>
+    <option value="ru">🇷🇺 Русский</option>
+    <option value="es">🇪🇸 Español</option>
+    <option value="fr">🇫🇷 Français</option>
+    <option value="de">🇩🇪 Deutsch</option>
+    <option value="ar">🇸🇦 العربية</option>
+    <option value="hi">🇮🇳 हिन्दी</option>
   </select>
 
   <div class="message" id="message"></div>
 </header>
 
 <div class="scroll-section">
-  <div class="card-group">
-
-    <div class="card" onclick="flipCard(this,'powerbank')">
-      <div class="card-inner">
-        <div class="card-front">
-          <img src="https://cdn-icons-png.flaticon.com/512/3103/3103446.png">
-          Powerbank
-        </div>
-        <div class="card-back">
-          ✓
-        </div>
-      </div>
-    </div>
-
-    <div class="card" onclick="flipCard(this,'battery')">
-      <div class="card-inner">
-        <div class="card-front">Battery</div>
-        <div class="card-back">✓</div>
-      </div>
-    </div>
-
-    <div class="card" onclick="flipCard(this,'laptop')">
-      <div class="card-inner">
-        <div class="card-front">Laptop</div>
-        <div class="card-back">✓</div>
-      </div>
-    </div>
-
-    <div class="card" onclick="flipCard(this,'phone')">
-      <div class="card-inner">
-        <div class="card-front">Phone</div>
-        <div class="card-back">✓</div>
-      </div>
-    </div>
-
-    <div class="card" onclick="flipCard(this,'tablet')">
-      <div class="card-inner">
-        <div class="card-front">Tablet</div>
-        <div class="card-back">✓</div>
-      </div>
-    </div>
-
-    <div class="card" onclick="flipCard(this,'camera')">
-      <div class="card-inner">
-        <div class="card-front">Camera</div>
-        <div class="card-back">✓</div>
-      </div>
-    </div>
-
-  </div>
+  <div class="card-group" id="cardContainer"></div>
 </div>
 
 <script>
 
 let currentLang="th";
 
+/* ===== TRANSLATIONS ===== */
 const translations={
-  th:{instruction:"โปรดเลือกอุปกรณ์ที่มีอยู่ในกระเป๋าคุณ",
-      powerbank:"พาวเวอร์แบงค์ต้องพกขึ้นเครื่อง",
-      battery:"แบตเตอรี่ลิเธียมต้องแจ้งเจ้าหน้าที่",
-      laptop:"กรุณานำออกจากกระเป๋า",
-      phone:"โทรศัพท์สามารถพกพาได้",
-      tablet:"แท็บเล็ตต้องผ่านการสแกน",
-      camera:"กล้องสามารถพกขึ้นเครื่องได้"},
-  en:{instruction:"Please select items in your bag",
-      powerbank:"Powerbank must be carried on board",
-      battery:"Lithium battery must be declared",
-      laptop:"Please remove from bag",
-      phone:"Phone is allowed",
-      tablet:"Tablet must be scanned",
-      camera:"Camera is allowed on board"},
-  zh:{instruction:"请选择您包中的物品"},
-  ja:{instruction:"バッグの中の物を選択してください"},
-  ko:{instruction:"가방 안의 물품을 선택하세요"},
-  ru:{instruction:"Выберите предметы в вашей сумке"},
-  es:{instruction:"Seleccione los artículos en su bolsa"},
-  fr:{instruction:"Veuillez sélectionner les articles dans votre sac"},
-  de:{instruction:"Bitte wählen Sie Gegenstände in Ihrer Tasche"},
-  ar:{instruction:"يرجى اختيار العناصر في حقيبتك"},
-  hi:{instruction:"कृपया अपने बैग में मौजूद वस्तुओं का चयन करें"}
+th:{
+title:"ระบบตรวจสอบสัมภาระโหลดใต้เครื่อง",
+instruction:"กรุณาเลือกอุปกรณ์ที่อยู่ในกระเป๋าที่กำลังโหลดใต้เครื่องของคุณ",
+items:{
+powerbank:"พาวเวอร์แบงค์",
+battery:"แบตเตอรี่ลิเธียม",
+laptop:"แล็ปท็อป",
+phone:"โทรศัพท์",
+tablet:"แท็บเล็ต",
+camera:"กล้อง"
+},
+messages:{
+powerbank:"ต้องนำติดตัวขึ้นเครื่องเท่านั้น",
+battery:"ต้องแจ้งเจ้าหน้าที่ก่อนโหลด",
+laptop:"ควรนำออกจากกระเป๋า",
+phone:"สามารถบรรจุได้",
+tablet:"ต้องผ่านการตรวจสอบ",
+camera:"สามารถบรรจุได้"
+}
+},
+en:{
+title:"Checked Baggage Safety System",
+instruction:"Please select items inside your checked baggage",
+items:{
+powerbank:"Powerbank",
+battery:"Lithium Battery",
+laptop:"Laptop",
+phone:"Mobile Phone",
+tablet:"Tablet",
+camera:"Camera"
+},
+messages:{
+powerbank:"Must be carried on board only",
+battery:"Must be declared before check-in",
+laptop:"Should be removed from bag",
+phone:"Allowed",
+tablet:"Subject to inspection",
+camera:"Allowed"
+}
+}
 };
+
+/* ===== CREATE CARDS ===== */
+const itemKeys=["powerbank","battery","laptop","phone","tablet","camera"];
+const container=document.getElementById("cardContainer");
+
+function renderCards(){
+  container.innerHTML="";
+  itemKeys.forEach(key=>{
+    const card=document.createElement("div");
+    card.className="card";
+    card.innerHTML=`
+      <div class="card-inner">
+        <div class="card-front">${translations[currentLang].items[key]}</div>
+        <div class="card-back">✓</div>
+      </div>
+    `;
+    card.onclick=()=>flipCard(card,key);
+    container.appendChild(card);
+  });
+}
 
 function changeLang(lang){
   currentLang=lang;
-  document.getElementById("instructionText").innerText=
-    translations[lang].instruction || translations["en"].instruction;
+
+  document.getElementById("title").innerText=translations[lang].title;
+  document.getElementById("instructionText").innerText=translations[lang].instruction;
+  document.getElementById("message").innerText="";
+
+  if(lang==="ar"){
+    document.body.dir="rtl";
+  }else{
+    document.body.dir="ltr";
+  }
+
+  renderCards();
 }
 
 function flipCard(card,key){
   card.classList.toggle("flipped");
-  if(translations[currentLang] && translations[currentLang][key]){
-    document.getElementById("message").innerText=
-      translations[currentLang][key];
-  }
+  document.getElementById("message").innerText=
+    translations[currentLang].messages[key];
 }
+
+renderCards();
 
 </script>
 
