@@ -46,16 +46,11 @@ button:hover{background:#b91c1c;}
   font-weight:bold;
   min-height:50px;
   font-size:20px;
-  transition:0.3s;
 }
 
 .message.alert{
   color:#ff3b3b;
   animation:blink 0.6s infinite alternate;
-}
-
-.message.success{
-  color:#22c55e;
 }
 
 @keyframes blink{
@@ -73,7 +68,7 @@ button:hover{background:#b91c1c;}
 .card{
   background:#1f2937;
   border-radius:20px;
-  height:260px;
+  height:240px;
   display:flex;
   flex-direction:column;
   justify-content:center;
@@ -81,47 +76,24 @@ button:hover{background:#b91c1c;}
   cursor:pointer;
   transition:0.3s;
   padding:15px;
-  position:relative;
 }
 
 .card:hover{transform:scale(1.05);}
-.card:active{transform:scale(0.97);}
-
-.card svg{
-  width:90px;
-  height:90px;
-  fill:white;
-}
-
-.card p{
-  margin-top:12px;
-  min-height:60px;
-}
-
-.card.selected{
-  background:#b91c1c;
-}
-
-.card.selected::after{
-  content:"✓";
-  position:absolute;
-  top:10px;
-  right:15px;
-  font-size:24px;
-  font-weight:bold;
-}
+.card.selected{background:#b91c1c;}
 
 .admin-panel{
   display:none;
   background:#1f2937;
-  padding:20px;
   margin:20px;
+  padding:20px;
   border-radius:15px;
 }
+
 .admin-panel table{
   width:100%;
   border-collapse:collapse;
 }
+
 .admin-panel th, .admin-panel td{
   border:1px solid #374151;
   padding:8px;
@@ -149,8 +121,8 @@ button:hover{background:#b91c1c;}
   </select>
 
   <button onclick="resetAll()">Reset</button>
-  <button onclick="document.documentElement.requestFullscreen()">Full Screen</button>
   <button onclick="toggleAdmin()">Admin</button>
+  <button onclick="document.documentElement.requestFullscreen()">Full Screen</button>
 
   <div class="message" id="message"></div>
 </header>
@@ -165,7 +137,6 @@ button:hover{background:#b91c1c;}
 
 <script>
 let currentLang="th";
-let selectedIndex=null;
 let resetTimer=null;
 
 const alertSound=new Audio("https://actions.google.com/sounds/v1/alarms/beep_short.ogg");
@@ -176,50 +147,78 @@ const icons=new Array(9).fill(
 );
 
 const translations={
-th:{title:"สิ่งของห้ามโหลดใต้ท้องเครื่อง",instruction:"กรุณาเลือกสิ่งของในกระเป๋าที่กำลังโหลด",
-items:["พาวเวอร์แบงค์","แบตเตอรี่สำรอง","บุหรี่ไฟฟ้า","โน้ตบุ๊ก/อุปกรณ์ลิเธียม","ไฟแช็ก","วัตถุระเบิด","สารเคมีอันตราย","อาวุธ","วัตถุที่ไม่แน่ใจ"],
-allowedIndex:[8],
-warning:"❌ ห้ามโหลดใต้เครื่อง ต้องถือขึ้นเครื่องเท่านั้น",
-allowed:"✅ สามารถโหลดใต้เครื่องได้",
-ask:"⚠ โปรดสอบถามเจ้าหน้าที่"},
-en:{title:"Prohibited Items in Checked Baggage",instruction:"Select items inside your checked baggage",
-items:["Power Bank","Spare Battery","E-Cigarette","Laptop","Lighter","Explosives","Hazardous Chemical","Weapon","Unsure Item"],
-allowedIndex:[8],
-warning:"❌ Prohibited in checked baggage.",
-allowed:"✅ Allowed in checked baggage.",
-ask:"⚠ Please ask airport staff."},
-zh:{title:"禁止托运行李物品",instruction:"请选择托运行李中的物品",
-items:["充电宝","备用电池","电子烟","笔记本电脑","打火机","爆炸物","危险化学品","武器","不确定物品"],
-allowedIndex:[8],warning:"❌ 禁止托运",allowed:"✅ 可以托运",ask:"⚠ 请咨询工作人员"},
-ja:{title:"受託手荷物禁止品",instruction:"受託手荷物の中の物品を選択してください",
-items:["モバイルバッテリー","予備バッテリー","電子タバコ","ノートPC","ライター","爆発物","危険物","武器","不明な物"],
-allowedIndex:[8],warning:"❌ 受託不可",allowed:"✅ 受託可能",ask:"⚠ スタッフに確認"},
-ko:{title:"위탁 수하물 금지 품목",instruction:"위탁 수하물 안의 물품을 선택하세요",
-items:["보조배터리","예비 배터리","전자담배","노트북","라이터","폭발물","위험물","무기","확실하지 않은 물품"],
-allowedIndex:[8],warning:"❌ 위탁 금지",allowed:"✅ 위탁 가능",ask:"⚠ 직원 문의"},
-es:{title:"Artículos Prohibidos",instruction:"Seleccione artículos",
-items:["Power Bank","Batería","Cigarrillo electrónico","Portátil","Encendedor","Explosivos","Químico","Arma","Artículo dudoso"],
-allowedIndex:[8],warning:"❌ Prohibido",allowed:"✅ Permitido",ask:"⚠ Consulte al personal"},
-fr:{title:"Objets Interdits",instruction:"Sélectionnez les objets",
-items:["Batterie externe","Batterie","Cigarette électronique","Ordinateur","Briquet","Explosifs","Produit chimique","Arme","Objet incertain"],
-allowedIndex:[8],warning:"❌ Interdit",allowed:"✅ Autorisé",ask:"⚠ Demandez au personnel"},
-de:{title:"Verbotene Gegenstände",instruction:"Wählen Sie Gegenstände",
+th:{title:"สิ่งของห้ามโหลดใต้ท้องเครื่อง",instruction:"กรุณาเลือกสิ่งของ",
+items:["พาวเวอร์แบงค์","แบตเตอรี่สำรอง","บุหรี่ไฟฟ้า","โน้ตบุ๊ก","ไฟแช็ก","วัตถุระเบิด","สารเคมี","อาวุธ","วัตถุที่ไม่แน่ใจ"],
+warning:"❌ ห้ามโหลดใต้เครื่อง",
+warningSpeak:"ไม่สามารถโหลดใต้ท้องเครื่องได้ กรุณาถือขึ้นเครื่องเท่านั้น",
+ask:"⚠ โปรดสอบถามเจ้าหน้าที่",
+askSpeak:"กรุณาสอบถามเจ้าหน้าที่"},
+en:{title:"Prohibited Items",instruction:"Select an item",
+items:["Power Bank","Battery","E-Cigarette","Laptop","Lighter","Explosives","Chemical","Weapon","Unsure Item"],
+warning:"❌ Prohibited",
+warningSpeak:"This item is not permitted in checked baggage. Please carry it on board.",
+ask:"⚠ Ask staff",
+askSpeak:"Please ask airport staff for assistance."},
+zh:{title:"禁止物品",instruction:"请选择物品",
+items:["充电宝","电池","电子烟","笔记本","打火机","爆炸物","化学品","武器","不确定"],
+warning:"❌ 禁止托运",
+warningSpeak:"此物品禁止托运，请随身携带。",
+ask:"⚠ 请咨询工作人员",
+askSpeak:"请咨询机场工作人员。"},
+ja:{title:"禁止品",instruction:"物品を選択",
+items:["モバイルバッテリー","電池","電子タバコ","ノートPC","ライター","爆発物","化学物質","武器","不明"],
+warning:"❌ 受託不可",
+warningSpeak:"この物品は受託手荷物として預けることはできません。",
+ask:"⚠ スタッフ確認",
+askSpeak:"空港スタッフにお問い合わせください。"},
+ko:{title:"금지 품목",instruction:"물품 선택",
+items:["보조배터리","배터리","전자담배","노트북","라이터","폭발물","화학물질","무기","불확실"],
+warning:"❌ 위탁 금지",
+warningSpeak:"이 물품은 위탁 수하물로 보낼 수 없습니다.",
+ask:"⚠ 직원 문의",
+askSpeak:"공항 직원에게 문의해 주세요."},
+es:{title:"Artículos Prohibidos",instruction:"Seleccione artículo",
+items:["Power Bank","Batería","Cigarrillo electrónico","Portátil","Encendedor","Explosivos","Químico","Arma","Dudoso"],
+warning:"❌ Prohibido",
+warningSpeak:"Este artículo no está permitido en el equipaje facturado.",
+ask:"⚠ Consulte al personal",
+askSpeak:"Consulte al personal del aeropuerto."},
+fr:{title:"Objets Interdits",instruction:"Sélectionnez",
+items:["Batterie","Cigarette électronique","Ordinateur","Briquet","Explosifs","Produit chimique","Arme","Incertain"],
+warning:"❌ Interdit",
+warningSpeak:"Cet objet est interdit en soute.",
+ask:"⚠ Demandez au personnel",
+askSpeak:"Veuillez demander au personnel de l'aéroport."},
+de:{title:"Verbotene Gegenstände",instruction:"Wählen Sie",
 items:["Powerbank","Batterie","E-Zigarette","Laptop","Feuerzeug","Explosivstoffe","Chemikalie","Waffe","Unsicher"],
-allowedIndex:[8],warning:"❌ Verboten",allowed:"✅ Erlaubt",ask:"⚠ Personal fragen"},
-ru:{title:"Запрещенные предметы",instruction:"Выберите предмет",
+warning:"❌ Verboten",
+warningSpeak:"Dieser Gegenstand ist im Aufgabegepäck nicht erlaubt.",
+ask:"⚠ Personal fragen",
+askSpeak:"Bitte fragen Sie das Flughafenpersonal."},
+ru:{title:"Запрещено",instruction:"Выберите предмет",
 items:["Пауэрбанк","Батарея","Эл. сигарета","Ноутбук","Зажигалка","Взрывчатка","Химикат","Оружие","Не уверен"],
-allowedIndex:[8],warning:"❌ Запрещено",allowed:"✅ Разрешено",ask:"⚠ Спросите сотрудника"},
-ar:{title:"مواد محظورة",instruction:"اختر العناصر",
-items:["باور بنك","بطارية","سيجارة إلكترونية","كمبيوتر","ولاعة","متفجرات","مواد كيميائية","سلاح","عنصر غير مؤكد"],
-allowedIndex:[8],warning:"❌ ممنوع",allowed:"✅ مسموح",ask:"⚠ اسأل الموظف"},
+warning:"❌ Запрещено",
+warningSpeak:"Этот предмет запрещен в зарегистрированном багаже.",
+ask:"⚠ Спросите сотрудника",
+askSpeak:"Пожалуйста, обратитесь к сотруднику аэропорта."},
+ar:{title:"مواد محظورة",instruction:"اختر العنصر",
+items:["باور بنك","بطارية","سيجارة إلكترونية","كمبيوتر","ولاعة","متفجرات","مواد كيميائية","سلاح","غير مؤكد"],
+warning:"❌ ممنوع",
+warningSpeak:"هذا العنصر غير مسموح به في الأمتعة المسجلة.",
+ask:"⚠ اسأل الموظف",
+askSpeak:"يرجى سؤال موظف المطار."},
 hi:{title:"प्रतिबंधित वस्तुएँ",instruction:"वस्तु चुनें",
 items:["पावर बैंक","बैटरी","ई-सिगरेट","लैपटॉप","लाइटर","विस्फोटक","रसायन","हथियार","अनिश्चित"],
-allowedIndex:[8],warning:"❌ प्रतिबंधित",allowed:"✅ अनुमति",ask:"⚠ स्टाफ से पूछें"}
+warning:"❌ प्रतिबंधित",
+warningSpeak:"यह वस्तु चेक-इन बैगेज में अनुमति नहीं है।",
+ask:"⚠ स्टाफ से पूछें",
+askSpeak:"कृपया हवाई अड्डा स्टाफ से पूछें।"}
 };
 
 function speak(text){
   const utter=new SpeechSynthesisUtterance(text);
   utter.lang=currentLang;
+  utter.rate=0.95;
   speechSynthesis.cancel();
   speechSynthesis.speak(utter);
 }
@@ -242,45 +241,23 @@ function saveStat(index){
   localStorage.setItem("kioskStats",JSON.stringify(stats));
 }
 
-function loadStats(){
-  let stats=JSON.parse(localStorage.getItem("kioskStats")||"{}");
-  const table=document.getElementById("statsTable");
-  table.innerHTML="<tr><th>Item</th><th>Count</th></tr>";
-  Object.keys(stats).forEach(i=>{
-    table.innerHTML+=`<tr><td>${translations[currentLang].items[i]}</td><td>${stats[i]}</td></tr>`;
-  });
-}
-
-function clearStats(){
-  localStorage.removeItem("kioskStats");
-  loadStats();
-}
-
-function toggleAdmin(){
-  const panel=document.getElementById("adminPanel");
-  panel.style.display=panel.style.display==="block"?"none":"block";
-  loadStats();
-}
-
 function selectItem(index){
   saveStat(index);
+
   document.querySelectorAll(".card").forEach(c=>c.classList.remove("selected"));
   document.querySelectorAll(".card")[index].classList.add("selected");
 
-  const msg=document.getElementById("message");
-  msg.classList.remove("alert","success");
-
   const data=translations[currentLang];
+  const msg=document.getElementById("message");
 
   if(index===8){
     msg.innerText=data.ask;
-    speak(data.ask);
+    speak(data.askSpeak);
     infoSound.play();
-  }
-  else{
+  }else{
     msg.innerText=data.warning;
     msg.classList.add("alert");
-    speak(data.warning);
+    speak(data.warningSpeak);
     alertSound.play();
   }
 
@@ -291,6 +268,16 @@ function selectItem(index){
 function resetAll(){
   document.querySelectorAll(".card").forEach(c=>c.classList.remove("selected"));
   document.getElementById("message").innerText="";
+}
+
+function toggleAdmin(){
+  const panel=document.getElementById("adminPanel");
+  panel.style.display=panel.style.display==="block"?"none":"block";
+}
+
+function clearStats(){
+  localStorage.removeItem("kioskStats");
+  alert("Statistics cleared");
 }
 
 function changeLang(lang){
