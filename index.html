@@ -8,15 +8,25 @@
 <style>
 body{
   margin:0;
-  font-family: Arial, sans-serif;
-  background: linear-gradient(135deg,#0f172a,#1e293b);
+  font-family:Arial, sans-serif;
+  background:#0f172a;
   color:white;
   text-align:center;
-  padding:30px;
+  padding:20px;
 }
 
 h1{
-  margin-bottom:20px;
+  margin-bottom:10px;
+}
+
+.lang-btn{
+  margin:5px;
+  padding:8px 15px;
+  border:none;
+  border-radius:8px;
+  cursor:pointer;
+  background:#334155;
+  color:white;
 }
 
 .grid{
@@ -24,7 +34,7 @@ h1{
   grid-template-columns:repeat(auto-fit,minmax(150px,1fr));
   gap:20px;
   max-width:800px;
-  margin:auto;
+  margin:20px auto;
 }
 
 .card{
@@ -61,73 +71,43 @@ h1{
   background:#334155;
 }
 
-.card-front img{
-  width:60px;
-  margin-bottom:10px;
-}
-
 .card-back{
   transform:rotateY(180deg);
-  color:white;
   font-weight:bold;
 }
 
 .green{ background:#16a34a; }
 .red{ background:#dc2626; }
-.yellow{ background:#f59e0b; }
 </style>
 </head>
 
 <body>
 
-<h1>🔍 BagSafe – Passenger Self Check</h1>
+<h1 id="title">BagSafe</h1>
+
+<button class="lang-btn" onclick="setLang('th')">ไทย</button>
+<button class="lang-btn" onclick="setLang('en')">English</button>
 
 <div class="grid">
 
   <div class="card" onclick="flipCard(this)">
     <div class="card-inner">
-      <div class="card-front">
-        <img src="https://cdn-icons-png.flaticon.com/512/1041/1041889.png">
-        <div>Power Bank</div>
+      <div class="card-front" id="pb-front">
+        Power Bank
       </div>
-      <div class="card-back red">
-        🔴 Carry-on only<br>ห้ามโหลดใต้เครื่อง
-      </div>
-    </div>
-  </div>
-
-  <div class="card" onclick="flipCard(this)">
-    <div class="card-inner">
-      <div class="card-front">
-        <img src="https://cdn-icons-png.flaticon.com/512/2913/2913465.png">
-        <div>Liquid &gt;100ml</div>
-      </div>
-      <div class="card-back red">
-        🔴 Not allowed in cabin<br>เกิน 100ml ห้ามถือขึ้นเครื่อง
+      <div class="card-back red" id="pb-back">
+        🔴 Carry-on only
       </div>
     </div>
   </div>
 
   <div class="card" onclick="flipCard(this)">
     <div class="card-inner">
-      <div class="card-front">
-        <img src="https://cdn-icons-png.flaticon.com/512/3096/3096673.png">
-        <div>Sharp Object</div>
+      <div class="card-front" id="cl-front">
+        Clothes
       </div>
-      <div class="card-back red">
-        🔴 Prohibited item<br>ของมีคมห้ามนำขึ้นเครื่อง
-      </div>
-    </div>
-  </div>
-
-  <div class="card" onclick="flipCard(this)">
-    <div class="card-inner">
-      <div class="card-front">
-        <img src="https://cdn-icons-png.flaticon.com/512/1046/1046784.png">
-        <div>Clothes</div>
-      </div>
-      <div class="card-back green">
-        🟢 Safe item<br>สามารถโหลดได้
+      <div class="card-back green" id="cl-back">
+        🟢 Safe item
       </div>
     </div>
   </div>
@@ -138,97 +118,18 @@ h1{
 function flipCard(card){
   card.classList.toggle("flipped");
 }
-</script>
-
-</body>
-</html>
-.lang-btn{
-  padding:8px 15px;
-  border:none;
-  border-radius:8px;
-  margin:5px;
-  cursor:pointer;
-  background:#334155;
-  color:white;
-}
-
-.cards{
-  display:flex;
-  gap:15px;
-  margin-top:20px;
-}
-
-.card{
-  flex:1;
-  padding:25px;
-  border-radius:15px;
-  cursor:pointer;
-  transition:0.3s;
-  background:#334155;
-}
-
-.card:hover{
-  transform:scale(1.05);
-}
-
-.safe{background:#16a34a;}
-.danger{background:#dc2626;}
-
-.result{
-  margin-top:20px;
-  font-size:18px;
-  font-weight:bold;
-}
-</style>
-</head>
-
-<body>
-
-<div class="container">
-  <h1 id="title">🔋 BagSafe</h1>
-  <div class="language">
-    <button class="lang-btn" onclick="setLang('th')">ไทย</button>
-    <button class="lang-btn" onclick="setLang('en')">English</button>
-  </div>
-
-  <p id="question">คุณมี Power Bank หรือไม่?</p>
-
-  <div class="cards">
-    <div class="card safe" onclick="answer(true)" id="yesCard">มี</div>
-    <div class="card danger" onclick="answer(false)" id="noCard">ไม่มี</div>
-  </div>
-
-  <div class="result" id="result"></div>
-</div>
-
-<script>
-let currentLang = "th";
 
 function setLang(lang){
-  currentLang = lang;
-  if(lang==="th"){
-    document.getElementById("question").innerText="คุณมี Power Bank หรือไม่?";
-    document.getElementById("yesCard").innerText="มี";
-    document.getElementById("noCard").innerText="ไม่มี";
-    document.getElementById("result").innerText="";
-  }else{
-    document.getElementById("question").innerText="Do you have a Power Bank?";
-    document.getElementById("yesCard").innerText="Yes";
-    document.getElementById("noCard").innerText="No";
-    document.getElementById("result").innerText="";
-  }
-}
-
-function answer(hasPowerbank){
-  const result = document.getElementById("result");
-  if(currentLang==="th"){
-    result.innerText = hasPowerbank
-      ? "⚠️ ห้ามใส่ในกระเป๋าโหลด ต้องพกขึ้นเครื่อง"
-      : "✅ ปลอดภัย สามารถโหลดกระเป๋าได้";
-  }else{
-    result.innerText = hasPowerbank
-      ? "⚠️ Not allowed in checked baggage. Carry-on only."
-      : "✅ Safe for checked baggage.";
+  if(lang === "th"){
+    document.getElementById("pb-front").innerText = "พาวเวอร์แบงค์";
+    document.getElementById("pb-back").innerText = "🔴 ห้ามโหลดใต้เครื่อง";
+    document.getElementById("cl-front").innerText = "เสื้อผ้า";
+    document.getElementById("cl-back").innerText = "🟢 สามารถโหลดได้";
+  } else {
+    document.getElementById("pb-front").innerText = "Power Bank";
+    document.getElementById("pb-back").innerText = "🔴 Carry-on only";
+    document.getElementById("cl-front").innerText = "Clothes";
+    document.getElementById("cl-back").innerText = "🟢 Safe item";
   }
 }
 </script>
