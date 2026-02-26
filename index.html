@@ -1,42 +1,47 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>BagSafe - Dangerous Goods Check</title>
+<title>BagSafe Game</title>
 
 <style>
 body{
-  font-family: Arial, sans-serif;
+  font-family: Arial;
   background:#f4f6f9;
   text-align:center;
+  margin:0;
   padding:20px;
 }
 
-h1{ margin-bottom:10px; }
-
-select{
-  padding:8px;
+h1{
   margin-bottom:20px;
 }
 
-.container{
-  display:grid;
-  grid-template-columns:repeat(auto-fit, minmax(200px,1fr));
+.slider{
+  display:flex;
+  overflow-x:auto;
+  scroll-snap-type:x mandatory;
   gap:20px;
-  max-width:1100px;
-  margin:20px auto;
-  max-height:60vh;
-  overflow-y:auto;
+  padding-bottom:20px;
 }
 
-.card{ perspective:1000px; }
+.slider::-webkit-scrollbar{
+  display:none;
+}
+
+.card{
+  flex:0 0 280px;
+  height:380px;
+  scroll-snap-align:center;
+  perspective:1000px;
+}
 
 .card-inner{
-  position:relative;
   width:100%;
-  height:220px;
-  transition:transform 0.3s;
+  height:100%;
+  position:relative;
+  transition:transform 0.4s;
   transform-style:preserve-3d;
 }
 
@@ -48,14 +53,14 @@ select{
   position:absolute;
   width:100%;
   height:100%;
+  border-radius:20px;
   backface-visibility:hidden;
-  border-radius:12px;
   display:flex;
   flex-direction:column;
   justify-content:center;
   align-items:center;
-  padding:15px;
-  box-shadow:0 4px 10px rgba(0,0,0,0.1);
+  box-shadow:0 8px 20px rgba(0,0,0,0.15);
+  padding:20px;
 }
 
 .card-front{
@@ -63,140 +68,85 @@ select{
 }
 
 .card-front img{
-  width:70px;
-  margin-bottom:10px;
+  width:120px;
+  margin-bottom:20px;
 }
 
 .card-back{
-  transform:rotateY(180deg);
+  background:#e74c3c;
   color:white;
+  transform:rotateY(180deg);
+  font-size:20px;
   font-weight:bold;
 }
 
-.red{ background:#e74c3c; }
-.green{ background:#2ecc71; }
-
-.summary{
-  margin-top:20px;
-  font-size:18px;
-  font-weight:bold;
-}
 </style>
 </head>
 
 <body>
 
-<h1>BagSafe - Dangerous Goods Check</h1>
+<h1>BagSafe Card Game</h1>
 
-<select id="languageSelect" onchange="changeLanguage()">
-<option value="en">🇬🇧 English</option>
-<option value="th">🇹🇭 ไทย</option>
-<option value="cn">🇨🇳 中文</option>
-<option value="jp">🇯🇵 日本語</option>
-<option value="kr">🇰🇷 한국어</option>
-<option value="ru">🇷🇺 Русский</option>
-<option value="es">🇪🇸 Español</option>
-<option value="fr">🇫🇷 Français</option>
-<option value="de">🇩🇪 Deutsch</option>
-<option value="hi">🇮🇳 हिन्दी</option>
-<option value="ar">🇸🇦 العربية</option>
-</select>
+<div class="slider">
 
-<div class="container" id="cardContainer"></div>
+<!-- Power Bank ใบแรก -->
+<div class="card" onclick="flip(this)">
+  <div class="card-inner">
+    <div class="card-front">
+      <img src="https://cdn-icons-png.flaticon.com/512/1048/1048314.png">
+      <h2>Power Bank</h2>
+    </div>
+    <div class="card-back">
+      Allowed in Carry-on Only ⚠️
+    </div>
+  </div>
+</div>
 
-<div class="summary" id="summaryText">
-Selected dangerous items: 0
+<!-- Explosives -->
+<div class="card" onclick="flip(this)">
+  <div class="card-inner">
+    <div class="card-front">
+      <img src="https://cdn-icons-png.flaticon.com/512/684/684908.png">
+      <h2>Explosives</h2>
+    </div>
+    <div class="card-back">
+      Not Allowed ❌
+    </div>
+  </div>
+</div>
+
+<!-- Gas -->
+<div class="card" onclick="flip(this)">
+  <div class="card-inner">
+    <div class="card-front">
+      <img src="https://cdn-icons-png.flaticon.com/512/1046/1046784.png">
+      <h2>Compressed Gas</h2>
+    </div>
+    <div class="card-back">
+      Not Allowed ❌
+    </div>
+  </div>
+</div>
+
+<!-- Flammable Liquid -->
+<div class="card" onclick="flip(this)">
+  <div class="card-inner">
+    <div class="card-front">
+      <img src="https://cdn-icons-png.flaticon.com/512/3075/3075977.png">
+      <h2>Flammable Liquid</h2>
+    </div>
+    <div class="card-back">
+      Not Allowed ❌
+    </div>
+  </div>
+</div>
+
 </div>
 
 <script>
-
-const items = [
-{key:"explosives", img:"https://cdn-icons-png.flaticon.com/512/684/684908.png"},
-{key:"gas", img:"https://cdn-icons-png.flaticon.com/512/1046/1046784.png"},
-{key:"flammable_liquid", img:"https://cdn-icons-png.flaticon.com/512/3075/3075977.png"},
-{key:"flammable_solid", img:"https://cdn-icons-png.flaticon.com/512/833/833472.png"},
-{key:"oxidizing", img:"https://cdn-icons-png.flaticon.com/512/565/565547.png"},
-{key:"poison", img:"https://cdn-icons-png.flaticon.com/512/564/564619.png"},
-{key:"radioactive", img:"https://cdn-icons-png.flaticon.com/512/2965/2965567.png"},
-{key:"corrosive", img:"https://cdn-icons-png.flaticon.com/512/2913/2913604.png"},
-{key:"misc", img:"https://cdn-icons-png.flaticon.com/512/565/565350.png"}
-];
-
-const translations = {
-en:{
-explosives:"Explosives",
-gas:"Compressed Gas",
-flammable_liquid:"Flammable Liquids",
-flammable_solid:"Flammable Solids",
-oxidizing:"Oxidising Materials",
-poison:"Poisonous / Infectious",
-radioactive:"Radioactive Materials",
-corrosive:"Corrosives",
-misc:"Misc Dangerous Goods",
-not_allowed:"❌ Not allowed on aircraft",
-summary:"Selected dangerous items: "
-},
-th:{
-explosives:"วัตถุระเบิด",
-gas:"ก๊าซอัดแรงดัน",
-flammable_liquid:"ของเหลวไวไฟ",
-flammable_solid:"ของแข็งไวไฟ",
-oxidizing:"สารออกซิไดซ์",
-poison:"สารพิษ / ติดเชื้อ",
-radioactive:"สารกัมมันตรังสี",
-corrosive:"สารกัดกร่อน",
-misc:"วัตถุอันตรายอื่น ๆ",
-not_allowed:"❌ ห้ามนำขึ้นเครื่อง",
-summary:"จำนวนสิ่งของอันตรายที่เลือก: "
+function flip(card){
+  card.classList.toggle("flipped");
 }
-};
-
-let currentLang="en";
-let selectedCount=0;
-
-function createCards(){
-const container=document.getElementById("cardContainer");
-container.innerHTML="";
-items.forEach(item=>{
-container.innerHTML+=`
-<div class="card" onclick="flipCard(this)">
-<div class="card-inner">
-<div class="card-front">
-<img src="${item.img}">
-<p>${translations[currentLang][item.key]}</p>
-</div>
-<div class="card-back red">
-${translations[currentLang].not_allowed}
-</div>
-</div>
-</div>
-`;
-});
-}
-
-function flipCard(card){
-if(!card.classList.contains("flipped")){
-selectedCount++;
-}else{
-selectedCount--;
-}
-card.classList.toggle("flipped");
-updateSummary();
-}
-
-function updateSummary(){
-document.getElementById("summaryText").innerText=
-translations[currentLang].summary + selectedCount;
-}
-
-function changeLanguage(){
-currentLang=document.getElementById("languageSelect").value;
-createCards();
-updateSummary();
-}
-
-createCards();
-
 </script>
 
 </body>
