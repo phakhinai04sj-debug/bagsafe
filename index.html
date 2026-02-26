@@ -3,70 +3,24 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Airport Safety Kiosk Enterprise - RTL Ready</title>
-
-<!-- Google Fonts รองรับทุกภาษา -->
-<link href="https://fonts.googleapis.com/css2?family=Noto+Sans:wght@400;600&family=Noto+Sans+Arabic:wght@400;600&display=swap" rel="stylesheet">
+<title>Airport Safety Kiosk Enterprise - 11 Languages</title>
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 
 <style>
-body{
-  margin:0;
-  font-family:"Noto Sans","Noto Sans Arabic",sans-serif;
-  background:#0b1220;
-  color:white;
-  text-align:center;
-  transition:0.3s;
-}
-header{
-  background:#111827;
-  padding:15px;
-  position:sticky;
-  top:0;
-  z-index:10;
-}
+body{margin:0;font-family:Arial;background:#0b1220;color:white;text-align:center;}
+header{background:#111827;padding:15px;position:sticky;top:0;}
 h1{margin:5px;color:#ff2d2d;}
-select,button{
-  padding:8px 12px;
-  border-radius:8px;
-  border:none;
-  margin:5px;
-  cursor:pointer;
-}
+select,button{padding:8px 12px;border-radius:8px;border:none;margin:5px;cursor:pointer;}
 button{background:#374151;color:white;}
 button:hover{background:#b91c1c;}
-.message{
-  font-size:20px;
-  font-weight:bold;
-  min-height:40px;
-  margin-top:10px;
-}
-.card-group{
-  display:grid;
-  grid-template-columns:repeat(auto-fit,minmax(180px,1fr));
-  gap:20px;
-  padding:20px;
-}
-.card{
-  background:#1f2937;
-  border-radius:15px;
-  padding:20px;
-  cursor:pointer;
-  transition:.3s;
-}
+.message{font-size:20px;font-weight:bold;min-height:40px;margin-top:10px;}
+.card-group{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:20px;padding:20px;}
+.card{background:#1f2937;border-radius:15px;padding:20px;cursor:pointer;transition:.3s;}
 .card:hover{transform:scale(1.05);}
-.admin-panel{
-  display:none;
-  background:#111827;
-  padding:20px;
-}
+.admin-panel{display:none;background:#111827;padding:20px;}
 canvas{max-width:700px;margin:auto;}
-.rtl{
-  direction:rtl;
-  text-align:right;
-}
 </style>
 </head>
 <body>
@@ -110,65 +64,37 @@ let currentLang="th";
 const ADMIN_PASS="1234";
 let stats=JSON.parse(localStorage.getItem("stats"))||{};
 
-const baseItems=["Power Bank","Battery","E-Cigarette","Laptop","Lighter","Explosives","Hazardous Chemical","Weapon","Unsure"];
+const itemsBase=["Power Bank","Battery","E-Cigarette","Laptop","Lighter","Explosives","Hazardous Chemical","Weapon","Unsure"];
 
 const translations={
-ar:{
-title:"نظام سلامة أمتعة المطار",
-instruction:"يرجى اختيار العنصر",
-items:["شاحن متنقل","بطارية","سيجارة إلكترونية","حاسوب محمول","ولاعة","متفجرات","مواد كيميائية خطرة","سلاح","غير متأكد"],
-warning:"❌ غير مسموح في الأمتعة المشحونة",
-warningSpeak:"هذا العنصر غير مسموح في الأمتعة المشحونة. يرجى حمله داخل الطائرة.",
-ask:"⚠ يرجى سؤال الموظفين",
-askSpeak:"يرجى سؤال موظفي المطار."
-},
-en:{
-title:"Airport Baggage Safety System",
-instruction:"Please select an item",
-items:baseItems,
-warning:"❌ Not permitted in checked baggage",
-warningSpeak:"This item is not permitted in checked baggage. Please carry it on board.",
-ask:"⚠ Please ask airport staff",
-askSpeak:"Please ask airport staff for assistance."
-},
-th:{
-title:"ระบบตรวจสอบสัมภาระสนามบิน",
-instruction:"กรุณาเลือกสิ่งของ",
-items:["พาวเวอร์แบงค์","แบตเตอรี่","บุหรี่ไฟฟ้า","โน้ตบุ๊ก","ไฟแช็ก","วัตถุระเบิด","สารเคมีอันตราย","อาวุธ","ไม่แน่ใจ"],
-warning:"❌ ห้ามโหลดใต้ท้องเครื่อง",
-warningSpeak:"ไม่สามารถโหลดใต้ท้องเครื่องได้ กรุณาถือขึ้นเครื่องเท่านั้น",
-ask:"⚠ โปรดสอบถามเจ้าหน้าที่",
-askSpeak:"กรุณาสอบถามเจ้าหน้าที่"
-}
+th:{title:"ระบบตรวจสอบสัมภาระสนามบิน",instruction:"กรุณาเลือกสิ่งของ",items:["พาวเวอร์แบงค์","แบตเตอรี่","บุหรี่ไฟฟ้า","โน้ตบุ๊ก","ไฟแช็ก","วัตถุระเบิด","สารเคมีอันตราย","อาวุธ","ไม่แน่ใจ"],
+warningSpeak:"ไม่สามารถโหลดใต้ท้องเครื่องได้ กรุณาถือขึ้นเครื่องเท่านั้น",askSpeak:"กรุณาสอบถามเจ้าหน้าที่"},
+en:{title:"Airport Baggage Safety System",instruction:"Please select an item",items:itemsBase,
+warningSpeak:"This item is not permitted in checked baggage. Please carry it on board.",askSpeak:"Please ask airport staff."},
+zh:{title:"机场行李安全系统",instruction:"请选择物品",items:["充电宝","电池","电子烟","笔记本电脑","打火机","爆炸物","危险化学品","武器","不确定"],
+warningSpeak:"此物品不可托运，请随身携带。",askSpeak:"请咨询工作人员。"},
+ja:{title:"空港手荷物安全システム",instruction:"項目を選択してください",items:["モバイルバッテリー","バッテリー","電子タバコ","ノートPC","ライター","爆発物","危険物","武器","不明な物"],
+warningSpeak:"この物品は預け入れできません。機内持ち込みしてください。",askSpeak:"スタッフにお問い合わせください。"},
+ko:{title:"공항 수하물 안전 시스템",instruction:"항목을 선택하세요",items:["보조배터리","배터리","전자담배","노트북","라이터","폭발물","위험 화학물질","무기","확실하지 않음"],
+warningSpeak:"이 물품은 위탁 수하물로 보낼 수 없습니다. 기내에 휴대해 주십시오.",askSpeak:"직원에게 문의하십시오."},
+ar:{title:"نظام سلامة أمتعة المطار",instruction:"يرجى اختيار العنصر",items:["شاحن متنقل","بطارية","سيجارة إلكترونية","حاسوب محمول","ولاعة","متفجرات","مواد كيميائية خطرة","سلاح","غير متأكد"],
+warningSpeak:"هذا العنصر غير مسموح في الأمتعة المشحونة. يرجى حمله معك داخل الطائرة.",askSpeak:"يرجى سؤال موظفي المطار."},
+fr:{title:"Système de Sécurité des Bagages",instruction:"Veuillez sélectionner un objet",items:itemsBase,
+warningSpeak:"Cet article n'est pas autorisé en soute. Veuillez le garder en cabine.",askSpeak:"Veuillez demander au personnel de l'aéroport."},
+de:{title:"Flughafen Gepäck-Sicherheitssystem",instruction:"Bitte wählen Sie einen Gegenstand",items:itemsBase,
+warningSpeak:"Dieser Gegenstand ist im aufgegebenen Gepäck nicht erlaubt. Bitte im Handgepäck mitführen.",askSpeak:"Bitte wenden Sie sich an das Flughafenpersonal."},
+es:{title:"Sistema de Seguridad de Equipaje",instruction:"Seleccione un artículo",items:itemsBase,
+warningSpeak:"Este artículo no está permitido en equipaje facturado. Llévelo en cabina.",askSpeak:"Por favor consulte al personal del aeropuerto."},
+ru:{title:"Система безопасности багажа",instruction:"Выберите предмет",items:itemsBase,
+warningSpeak:"Этот предмет запрещён в зарегистрированном багаже. Пожалуйста, возьмите его в салон.",askSpeak:"Пожалуйста, обратитесь к сотрудникам аэропорта."},
+hi:{title:"एयरपोर्ट बैगेज सुरक्षा प्रणाली",instruction:"कृपया एक वस्तु चुनें",items:itemsBase,
+warningSpeak:"यह वस्तु चेक-इन बैगेज में अनुमत नहीं है। कृपया इसे अपने साथ केबिन में रखें।",askSpeak:"कृपया हवाईअड्डा कर्मचारियों से संपर्क करें।"}
 };
-
-// เติมภาษาอื่นใช้ baseItems อัตโนมัติ
-["zh","ja","ko","fr","de","es","ru","hi"].forEach(lang=>{
-translations[lang]={
-title:lang.toUpperCase()+" Airport System",
-instruction:"Select item",
-items:baseItems,
-warning:"❌ Not permitted",
-warningSpeak:"This item is not permitted in checked baggage.",
-ask:"⚠ Ask staff",
-askSpeak:"Please ask airport staff."
-};
-});
 
 const langCodes={
 th:"th-TH",en:"en-US",zh:"zh-CN",ja:"ja-JP",ko:"ko-KR",ar:"ar-SA",
 fr:"fr-FR",de:"de-DE",es:"es-ES",ru:"ru-RU",hi:"hi-IN"
 };
-
-function applyDirection(lang){
-if(lang==="ar"){
-document.body.classList.add("rtl");
-document.documentElement.dir="rtl";
-}else{
-document.body.classList.remove("rtl");
-document.documentElement.dir="ltr";
-}
-}
 
 function speak(text){
 const utter=new SpeechSynthesisUtterance(text);
@@ -184,7 +110,7 @@ container.innerHTML="";
 translations[currentLang].items.forEach((item,i)=>{
 const card=document.createElement("div");
 card.className="card";
-card.innerText=item;
+card.innerHTML=item;
 card.onclick=()=>selectItem(i);
 container.appendChild(card);
 });
@@ -193,23 +119,14 @@ container.appendChild(card);
 function selectItem(index){
 const data=translations[currentLang];
 const msg=document.getElementById("message");
-
-const key=currentLang+"-"+data.items[index];
-stats[key]=(stats[key]||0)+1;
+stats[data.items[index]]=(stats[data.items[index]]||0)+1;
 localStorage.setItem("stats",JSON.stringify(stats));
-
-if(index===8){
-msg.innerText=data.ask;
-speak(data.askSpeak);
-}else{
-msg.innerText=data.warning;
-speak(data.warningSpeak);
-}
+if(index===8){msg.innerText="⚠";speak(data.askSpeak);}
+else{msg.innerText="❌";speak(data.warningSpeak);}
 }
 
 function changeLang(lang){
 currentLang=lang;
-applyDirection(lang);
 document.getElementById("title").innerText=translations[lang].title;
 document.getElementById("instruction").innerText=translations[lang].instruction;
 renderCards();
@@ -217,10 +134,8 @@ renderCards();
 
 function enterAdmin(){
 const pass=prompt("Enter Admin Password:");
-if(pass===ADMIN_PASS){
-document.getElementById("adminPanel").style.display="block";
-renderChart();
-}else{alert("Access Denied");}
+if(pass==="1234"){document.getElementById("adminPanel").style.display="block";renderChart();}
+else{alert("Access Denied");}
 }
 
 function renderChart(){
@@ -236,22 +151,12 @@ const { jsPDF }=window.jspdf;
 const doc=new jsPDF();
 doc.text("Airport Kiosk Report",20,20);
 let y=30;
-for(let key in stats){
-doc.text(key+" : "+stats[key],20,y);
-y+=10;
-}
+for(let key in stats){doc.text(key+" : "+stats[key],20,y);y+=10;}
 doc.save("Airport_Report.pdf");
 }
 
-function resetStats(){
-localStorage.removeItem("stats");
-location.reload();
-}
-
-function goFullscreen(){
-document.documentElement.requestFullscreen();
-}
-
+function resetStats(){localStorage.removeItem("stats");location.reload();}
+function goFullscreen(){document.documentElement.requestFullscreen();}
 changeLang("th");
 </script>
 </body>
