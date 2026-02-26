@@ -2,88 +2,101 @@
 <html lang="th">
 <head>
 <meta charset="UTF-8">
-<title>Airport Security Kiosk</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Airport Baggage Kiosk - Full System</title>
 
 <style>
 body{
   margin:0;
   font-family:Arial, sans-serif;
-  background:#f3f4f6;
+  background:#0b1220;
+  color:white;
   text-align:center;
 }
 
 header{
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
-  padding:20px 40px;
-  background:white;
-  box-shadow:0 2px 5px rgba(0,0,0,0.1);
+  background:#111827;
+  padding:20px;
+  position:sticky;
+  top:0;
+  z-index:10;
 }
 
-h1{
-  margin:0;
-  font-size:26px;
+h1{margin:5px 0;color:#ff2d2d;font-size:26px;}
+.instructions{margin:8px 0;font-size:18px;}
+
+select,button{
+  padding:8px 12px;
+  border-radius:10px;
+  border:none;
+  margin:5px;
+  font-size:14px;
 }
 
-.lang-select{
-  margin:20px;
+button{
+  background:#374151;
+  color:white;
+  cursor:pointer;
 }
 
-.cards{
+button:hover{background:#b91c1c;}
+
+.message{
+  margin-top:15px;
+  font-weight:bold;
+  min-height:50px;
+  font-size:20px;
+}
+
+.message.alert{
+  color:#ff3b3b;
+  animation:blink 0.6s infinite alternate;
+}
+
+@keyframes blink{
+  from{opacity:1;}
+  to{opacity:0.5;}
+}
+
+.card-group{
   display:grid;
-  grid-template-columns:repeat(auto-fit,minmax(160px,1fr));
-  gap:20px;
+  grid-template-columns:repeat(auto-fit,minmax(200px,1fr));
+  gap:25px;
   padding:30px;
-  max-width:1000px;
-  margin:auto;
 }
 
 .card{
-  background:white;
-  padding:20px;
-  border-radius:16px;
+  background:#1f2937;
+  border-radius:20px;
+  height:240px;
+  display:flex;
+  flex-direction:column;
+  justify-content:center;
+  align-items:center;
   cursor:pointer;
-  font-size:18px;
-  box-shadow:0 4px 8px rgba(0,0,0,0.1);
   transition:0.3s;
-}
-
-.card:hover{
-  transform:scale(1.05);
-}
-
-.card.selected{
-  background:#fee2e2;
-}
-
-.message{
-  font-size:22px;
-  margin-top:20px;
-  min-height:40px;
-}
-
-.alert{
-  color:red;
-  font-weight:bold;
-}
-
-#menuDropdown{
-  display:none;
-  position:absolute;
-  right:0;
-  top:45px;
-  background:white;
   padding:15px;
-  border-radius:12px;
-  box-shadow:0 4px 10px rgba(0,0,0,0.2);
-  min-width:180px;
-  text-align:left;
 }
 
-#menuDropdown button{
+.card:hover{transform:scale(1.05);}
+.card.selected{background:#b91c1c;}
+
+.admin-panel{
+  display:none;
+  background:#1f2937;
+  margin:20px;
+  padding:20px;
+  border-radius:15px;
+}
+
+.admin-panel table{
   width:100%;
-  margin-bottom:10px;
+  border-collapse:collapse;
+}
+
+.admin-panel th, .admin-panel td{
+  border:1px solid #374151;
+  padding:8px;
 }
 </style>
 </head>
@@ -91,158 +104,191 @@ h1{
 
 <header>
   <h1 id="title"></h1>
+  <div class="instructions" id="instruction"></div>
 
-  <div style="position:relative;">
-    <button onclick="toggleMenu()" style="font-size:26px;background:none;border:none;cursor:pointer;">☰</button>
+  <select onchange="changeLang(this.value)">
+    <option value="th">🇹🇭 ไทย</option>
+    <option value="en">🇺🇸 English</option>
+    <option value="zh">🇨🇳 中文</option>
+    <option value="ja">🇯🇵 日本語</option>
+    <option value="ko">🇰🇷 한국어</option>
+    <option value="es">🇪🇸 Español</option>
+    <option value="fr">🇫🇷 Français</option>
+    <option value="de">🇩🇪 Deutsch</option>
+    <option value="ru">🇷🇺 Русский</option>
+    <option value="ar">🇸🇦 العربية</option>
+    <option value="hi">🇮🇳 हिन्दी</option>
+  </select>
 
-    <div id="menuDropdown">
-      <button onclick="goFullScreen()">🖥 Full Screen</button>
-      <button onclick="resetAll(); toggleMenu();" id="clearBtn"></button>
-    </div>
-  </div>
+  <button onclick="resetAll()">Reset</button>
+  <button onclick="toggleAdmin()">Admin</button>
+  <button onclick="document.documentElement.requestFullscreen()">Full Screen</button>
+
+  <div class="message" id="message"></div>
 </header>
 
-<div class="lang-select">
-  <select onchange="changeLang(this.value)">
-    <option value="th-TH">ไทย</option>
-    <option value="en-US">English</option>
-    <option value="zh-CN">中文</option>
-    <option value="ja-JP">日本語</option>
-    <option value="ko-KR">한국어</option>
-    <option value="ar-SA">العربية</option>
-  </select>
+<div class="card-group" id="cards"></div>
+
+<div class="admin-panel" id="adminPanel">
+  <h2>📊 Statistics</h2>
+  <table id="statsTable"></table>
+  <button onclick="clearStats()">Clear Data</button>
 </div>
 
-<div class="cards" id="cards"></div>
-
-<div class="message" id="message"></div>
-
 <script>
-let currentLang="th-TH";
-let resetTimer;
+let currentLang="th";
+let resetTimer=null;
 
-// เสียง
 const alertSound=new Audio("https://actions.google.com/sounds/v1/alarms/beep_short.ogg");
 const infoSound=new Audio("https://actions.google.com/sounds/v1/cartoon/wood_plank_flicks.ogg");
 
-// ข้อมูลภาษา
+const icons=new Array(9).fill(
+`<svg viewBox="0 0 24 24"><rect x="6" y="4" width="12" height="16" rx="2"/></svg>`
+);
+
 const translations={
-"th-TH":{
-title:"โปรดเลือกสิ่งของที่ท่านนำมา",
-items:["🔫 ปืน","🔪 มีด","💣 วัตถุระเบิด","🔥 วัตถุไวไฟ","🧴 ของเหลวเกิน 100ml","🔋 แบตเตอรี่สำรอง","🛠 เครื่องมือช่าง","⚗ สารเคมี","❓ ไม่แน่ใจ"],
-warning:"⚠ ห้ามนำขึ้นเครื่อง กรุณาติดต่อเจ้าหน้าที่",
-ask:"กรุณาสอบถามเจ้าหน้าที่",
-clear:"🧹 ล้างหน้าจอ"
-},
-"en-US":{
-title:"Please select the item you carry",
-items:["🔫 Gun","🔪 Knife","💣 Explosive","🔥 Flammable","🧴 Liquid over 100ml","🔋 Power Bank","🛠 Tools","⚗ Chemical","❓ Not Sure"],
-warning:"⚠ Prohibited item. Contact staff.",
-ask:"Please ask staff for assistance.",
-clear:"🧹 Clear Screen"
-},
-"zh-CN":{
-title:"请选择您携带的物品",
-items:["🔫 枪支","🔪 刀具","💣 爆炸物","🔥 易燃物","🧴 超过100毫升液体","🔋 充电宝","🛠 工具","⚗ 化学品","❓ 不确定"],
-warning:"⚠ 禁止携带，请联系工作人员",
-ask:"请咨询工作人员",
-clear:"🧹 清除屏幕"
-},
-"ja-JP":{
-title:"お持ちの物を選択してください",
-items:["🔫 銃","🔪 ナイフ","💣 爆発物","🔥 可燃物","🧴 100ml以上の液体","🔋 モバイルバッテリー","🛠 工具","⚗ 化学物質","❓ わからない"],
-warning:"⚠ 持ち込み禁止。係員に連絡してください。",
-ask:"係員にお尋ねください。",
-clear:"🧹 画面をクリア"
-},
-"ko-KR":{
-title:"소지품을 선택하세요",
-items:["🔫 총기","🔪 칼","💣 폭발물","🔥 인화성 물질","🧴 100ml 초과 액체","🔋 보조배터리","🛠 공구","⚗ 화학물질","❓ 모르겠습니다"],
-warning:"⚠ 기내 반입 금지. 직원에게 문의하세요.",
-ask:"직원에게 문의하세요.",
-clear:"🧹 화면 지우기"
-},
-"ar-SA":{
-title:"يرجى اختيار العنصر الذي تحمله",
-items:["🔫 سلاح","🔪 سكين","💣 متفجرات","🔥 مواد قابلة للاشتعال","🧴 سوائل أكثر من 100 مل","🔋 بنك طاقة","🛠 أدوات","⚗ مواد كيميائية","❓ غير متأكد"],
-warning:"⚠ عنصر محظور. يرجى الاتصال بالموظفين.",
-ask:"يرجى سؤال الموظفين.",
-clear:"🧹 مسح الشاشة"
-}
+th:{title:"สิ่งของห้ามโหลดใต้ท้องเครื่อง",instruction:"กรุณาเลือกสิ่งของ",
+items:["พาวเวอร์แบงค์","แบตเตอรี่สำรอง","บุหรี่ไฟฟ้า","โน้ตบุ๊ก","ไฟแช็ก","วัตถุระเบิด","สารเคมี","อาวุธ","วัตถุที่ไม่แน่ใจ"],
+warning:"❌ ห้ามโหลดใต้เครื่อง",
+warningSpeak:"ไม่สามารถโหลดใต้ท้องเครื่องได้ กรุณาถือขึ้นเครื่องเท่านั้น",
+ask:"⚠ โปรดสอบถามเจ้าหน้าที่",
+askSpeak:"กรุณาสอบถามเจ้าหน้าที่"},
+en:{title:"Prohibited Items",instruction:"Select an item",
+items:["Power Bank","Battery","E-Cigarette","Laptop","Lighter","Explosives","Chemical","Weapon","Unsure Item"],
+warning:"❌ Prohibited",
+warningSpeak:"This item is not permitted in checked baggage. Please carry it on board.",
+ask:"⚠ Ask staff",
+askSpeak:"Please ask airport staff for assistance."},
+zh:{title:"禁止物品",instruction:"请选择物品",
+items:["充电宝","电池","电子烟","笔记本","打火机","爆炸物","化学品","武器","不确定"],
+warning:"❌ 禁止托运",
+warningSpeak:"此物品禁止托运，请随身携带。",
+ask:"⚠ 请咨询工作人员",
+askSpeak:"请咨询机场工作人员。"},
+ja:{title:"禁止品",instruction:"物品を選択",
+items:["モバイルバッテリー","電池","電子タバコ","ノートPC","ライター","爆発物","化学物質","武器","不明"],
+warning:"❌ 受託不可",
+warningSpeak:"この物品は受託手荷物として預けることはできません。",
+ask:"⚠ スタッフ確認",
+askSpeak:"空港スタッフにお問い合わせください。"},
+ko:{title:"금지 품목",instruction:"물품 선택",
+items:["보조배터리","배터리","전자담배","노트북","라이터","폭발물","화학물질","무기","불확실"],
+warning:"❌ 위탁 금지",
+warningSpeak:"이 물품은 위탁 수하물로 보낼 수 없습니다.",
+ask:"⚠ 직원 문의",
+askSpeak:"공항 직원에게 문의해 주세요."},
+es:{title:"Artículos Prohibidos",instruction:"Seleccione artículo",
+items:["Power Bank","Batería","Cigarrillo electrónico","Portátil","Encendedor","Explosivos","Químico","Arma","Dudoso"],
+warning:"❌ Prohibido",
+warningSpeak:"Este artículo no está permitido en el equipaje facturado.",
+ask:"⚠ Consulte al personal",
+askSpeak:"Consulte al personal del aeropuerto."},
+fr:{title:"Objets Interdits",instruction:"Sélectionnez",
+items:["Batterie","Cigarette électronique","Ordinateur","Briquet","Explosifs","Produit chimique","Arme","Incertain"],
+warning:"❌ Interdit",
+warningSpeak:"Cet objet est interdit en soute.",
+ask:"⚠ Demandez au personnel",
+askSpeak:"Veuillez demander au personnel de l'aéroport."},
+de:{title:"Verbotene Gegenstände",instruction:"Wählen Sie",
+items:["Powerbank","Batterie","E-Zigarette","Laptop","Feuerzeug","Explosivstoffe","Chemikalie","Waffe","Unsicher"],
+warning:"❌ Verboten",
+warningSpeak:"Dieser Gegenstand ist im Aufgabegepäck nicht erlaubt.",
+ask:"⚠ Personal fragen",
+askSpeak:"Bitte fragen Sie das Flughafenpersonal."},
+ru:{title:"Запрещено",instruction:"Выберите предмет",
+items:["Пауэрбанк","Батарея","Эл. сигарета","Ноутбук","Зажигалка","Взрывчатка","Химикат","Оружие","Не уверен"],
+warning:"❌ Запрещено",
+warningSpeak:"Этот предмет запрещен в зарегистрированном багаже.",
+ask:"⚠ Спросите сотрудника",
+askSpeak:"Пожалуйста, обратитесь к сотруднику аэропорта."},
+ar:{title:"مواد محظورة",instruction:"اختر العنصر",
+items:["باور بنك","بطارية","سيجارة إلكترونية","كمبيوتر","ولاعة","متفجرات","مواد كيميائية","سلاح","غير مؤكد"],
+warning:"❌ ممنوع",
+warningSpeak:"هذا العنصر غير مسموح به في الأمتعة المسجلة.",
+ask:"⚠ اسأل الموظف",
+askSpeak:"يرجى سؤال موظف المطار."},
+hi:{title:"प्रतिबंधित वस्तुएँ",instruction:"वस्तु चुनें",
+items:["पावर बैंक","बैटरी","ई-सिगरेट","लैपटॉप","लाइटर","विस्फोटक","रसायन","हथियार","अनिश्चित"],
+warning:"❌ प्रतिबंधित",
+warningSpeak:"यह वस्तु चेक-इन बैगेज में अनुमति नहीं है।",
+ask:"⚠ स्टाफ से पूछें",
+askSpeak:"कृपया हवाई अड्डा स्टाफ से पूछें।"}
 };
 
-// สร้างการ์ด
-function render(){
-document.getElementById("title").innerText=translations[currentLang].title;
-document.getElementById("clearBtn").innerText=translations[currentLang].clear;
-
-const cards=document.getElementById("cards");
-cards.innerHTML="";
-
-translations[currentLang].items.forEach((item,index)=>{
-const div=document.createElement("div");
-div.className="card";
-div.innerText=item;
-div.onclick=()=>selectItem(index);
-cards.appendChild(div);
-});
-}
-
-// เลือกไอเท็ม
-function selectItem(index){
-document.querySelectorAll(".card").forEach(c=>c.classList.remove("selected"));
-document.querySelectorAll(".card")[index].classList.add("selected");
-
-const msg=document.getElementById("message");
-
-if(index===8){
-msg.innerText=translations[currentLang].ask;
-msg.classList.remove("alert");
-infoSound.play();
-speak(translations[currentLang].ask);
-}else{
-msg.innerText=translations[currentLang].warning;
-msg.classList.add("alert");
-alertSound.play();
-speak(translations[currentLang].warning);
-}
-
-clearTimeout(resetTimer);
-resetTimer=setTimeout(resetAll,30000);
-}
-
-// พูด
 function speak(text){
-const utter=new SpeechSynthesisUtterance(text);
-utter.lang=currentLang;
-utter.rate=0.95;
-speechSynthesis.cancel();
-speechSynthesis.speak(utter);
+  const utter=new SpeechSynthesisUtterance(text);
+  utter.lang=currentLang;
+  utter.rate=0.95;
+  speechSynthesis.cancel();
+  speechSynthesis.speak(utter);
 }
 
-// รีเซ็ต
+function renderCards(){
+  const container=document.getElementById("cards");
+  container.innerHTML="";
+  translations[currentLang].items.forEach((item,index)=>{
+    const card=document.createElement("div");
+    card.className="card";
+    card.innerHTML=icons[index]+`<p>${item}</p>`;
+    card.onclick=()=>selectItem(index);
+    container.appendChild(card);
+  });
+}
+
+function saveStat(index){
+  let stats=JSON.parse(localStorage.getItem("kioskStats")||"{}");
+  stats[index]=(stats[index]||0)+1;
+  localStorage.setItem("kioskStats",JSON.stringify(stats));
+}
+
+function selectItem(index){
+  saveStat(index);
+
+  document.querySelectorAll(".card").forEach(c=>c.classList.remove("selected"));
+  document.querySelectorAll(".card")[index].classList.add("selected");
+
+  const data=translations[currentLang];
+  const msg=document.getElementById("message");
+
+  if(index===8){
+    msg.innerText=data.ask;
+    speak(data.askSpeak);
+    infoSound.play();
+  }else{
+    msg.innerText=data.warning;
+    msg.classList.add("alert");
+    speak(data.warningSpeak);
+    alertSound.play();
+  }
+
+  clearTimeout(resetTimer);
+  resetTimer=setTimeout(resetAll,15000);
+}
+
 function resetAll(){
-document.getElementById("message").innerText="";
-document.querySelectorAll(".card").forEach(c=>c.classList.remove("selected"));
+  document.querySelectorAll(".card").forEach(c=>c.classList.remove("selected"));
+  document.getElementById("message").innerText="";
 }
 
-// เปลี่ยนภาษา
+function toggleAdmin(){
+  const panel=document.getElementById("adminPanel");
+  panel.style.display=panel.style.display==="block"?"none":"block";
+}
+
+function clearStats(){
+  localStorage.removeItem("kioskStats");
+  alert("Statistics cleared");
+}
+
 function changeLang(lang){
-currentLang=lang;
-render();
+  currentLang=lang;
+  document.getElementById("title").innerText=translations[lang].title;
+  document.getElementById("instruction").innerText=translations[lang].instruction;
+  renderCards();
+  resetAll();
 }
 
-// เมนู
-function toggleMenu(){
-const menu=document.getElementById("menuDropdown");
-menu.style.display=menu.style.display==="block"?"none":"block";
-}
-
-function goFullScreen(){
-document.documentElement.requestFullscreen();
-}
-
-render();
+changeLang("th");
 </script>
 
 </body>
