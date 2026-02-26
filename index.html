@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>BagSafe</title>
+<style>
+body{font-family:Arial;text-align:center;background:#f4f6f8;padding:20px}
+.card{background:#ddd;padding:20px;border-radius:12px;margin:15px auto;width:300px}
+button{padding:8px 15px;margin:5px;border:none;border-radius:8px;cursor:pointer}
+.yes{background:#e53935;color:white}
+.no{background:#43a047;color:white}
+.safe{background:#c8e6c9!important}
+.danger{background:#ffcdd2!important}
+#result{margin-top:20px;padding:15px;border-radius:10px;font-weight:bold}
+.green{background:#4caf50;color:white}
+.red{background:#e53935;color:white}
+</style>
+</head>
+<body>
+
+<h1>✈️ BagSafe</h1>
+<p>ไม่เก็บข้อมูลส่วนตัว • ใช้เวลาไม่เกิน 15 วินาที</p>
+
+<div class="card">
+<h3>🔋 มี Power Bank ในกระเป๋าโหลด?</h3>
+<button class="yes">มี</button>
+<button class="no">ไม่มี</button>
+</div>
+
+<div id="result"></div>
+
+<script>
+const card=document.querySelector(".card");
+const yes=document.querySelector(".yes");
+const no=document.querySelector(".no");
+const result=document.getElementById("result");
+
+yes.onclick=function(){
+card.classList.remove("safe");
+card.classList.add("danger");
+result.className="red";
+result.innerHTML="🚨 กรุณานำ Power Bank ออกจากกระเป๋าโหลด";
+}
+
+no.onclick=function(){
+card.classList.remove("danger");
+card.classList.add("safe");
+result.className="green";
+result.innerHTML="✅ กระเป๋าพร้อมโหลด";
+}
+</script>
+
+</body>
+</html>
