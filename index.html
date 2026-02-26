@@ -67,7 +67,7 @@ button{
 .card{
   background:#1f2937;
   border-radius:20px;
-  height:300px;
+  height:340px; /* เพิ่มความสูงให้รองรับรูป */
   display:flex;
   flex-direction:column;
   justify-content:center;
@@ -80,18 +80,17 @@ button{
 
 .card:hover{transform:scale(1.05);}
 
+.card svg{
+  width:80px;
+  height:80px;
+  fill:white;
+}
+
 .card img{
   width:90px;
   height:90px;
   object-fit:contain;
-  margin-bottom:10px;
-}
-
-.card svg{
-  width:70px;
-  height:70px;
-  fill:white;
-  margin-bottom:5px;
+  margin-top:8px;
 }
 
 .card p{
@@ -147,17 +146,17 @@ let resetTimer=null;
 const alertSound=new Audio("https://actions.google.com/sounds/v1/alarms/beep_short.ogg");
 const infoSound=new Audio("https://actions.google.com/sounds/v1/cartoon/wood_plank_flicks.ogg");
 
-/* 🔹 เพิ่มรูปภาพประกอบ */
-const images=[
-"https://cdn-icons-png.flaticon.com/512/1041/1041916.png",
-"https://cdn-icons-png.flaticon.com/512/1041/1041916.png",
-"https://cdn-icons-png.flaticon.com/512/483/483356.png",
-"https://cdn-icons-png.flaticon.com/512/888/888879.png",
-"https://cdn-icons-png.flaticon.com/512/3075/3075977.png",
+/* รูปภาพประกอบ */
+const imageUrls=[
+"https://cdn-icons-png.flaticon.com/512/1048/1048941.png",
+"https://cdn-icons-png.flaticon.com/512/1048/1048940.png",
 "https://cdn-icons-png.flaticon.com/512/565/565547.png",
-"https://cdn-icons-png.flaticon.com/512/2913/2913465.png",
-"https://cdn-icons-png.flaticon.com/512/2991/2991108.png",
-"https://cdn-icons-png.flaticon.com/512/1828/1828843.png"
+"https://cdn-icons-png.flaticon.com/512/888/888879.png",
+"https://cdn-icons-png.flaticon.com/512/565/565340.png",
+"https://cdn-icons-png.flaticon.com/512/616/616554.png",
+"https://cdn-icons-png.flaticon.com/512/565/565547.png",
+"https://cdn-icons-png.flaticon.com/512/833/833472.png",
+"https://cdn-icons-png.flaticon.com/512/565/565655.png"
 ];
 
 const icons=[
@@ -172,9 +171,8 @@ const icons=[
 `<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="5"/></svg>`
 ];
 
-const translations = { /* ของเดิมทั้งหมดคงไว้ */ 
-/* (ผมตัดตรงนี้ออกเพื่อไม่ให้ข้อความยาวเกิน แต่ให้ใช้ของเดิมคุณทั้งหมดได้เลย) */
-};
+/* translations ทั้งหมดของคุณ (เหมือนเดิม) */
+const translations = /* วาง translations เดิมของคุณตรงนี้ */ ;
 
 function renderCards(){
 const container=document.getElementById("cards");
@@ -183,9 +181,9 @@ translations[currentLang].items.forEach((item,index)=>{
 const card=document.createElement("div");
 card.className="card";
 card.innerHTML=
-`<img src="${images[index]}" alt="">
-${icons[index]}
-<p>${item}</p>`;
+icons[index]+
+`<img src="${imageUrls[index]}" alt="">`+
+`<p>${item}</p>`;
 card.onclick=()=>selectItem(index);
 container.appendChild(card);
 });
