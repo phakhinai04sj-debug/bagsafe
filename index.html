@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="th">
+<html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>BagSafe</title>
+<title>BagSafe - Dangerous Goods Check</title>
 
 <style>
 body{
@@ -13,34 +13,30 @@ body{
   padding:20px;
 }
 
-h1{
-  margin-bottom:10px;
-}
+h1{ margin-bottom:10px; }
 
-.lang-btn{
+select{
   padding:8px;
   margin-bottom:20px;
 }
 
 .container{
-  display:flex;
-  justify-content:center;
+  display:grid;
+  grid-template-columns:repeat(auto-fit, minmax(200px,1fr));
   gap:20px;
-  flex-wrap:wrap;
+  max-width:1100px;
+  margin:20px auto;
+  max-height:60vh;
+  overflow-y:auto;
 }
 
-.card{
-  width:250px;
-  height:180px;
-  perspective:1000px;
-  cursor:pointer;
-}
+.card{ perspective:1000px; }
 
 .card-inner{
   position:relative;
   width:100%;
-  height:100%;
-  transition:transform 0.8s;
+  height:220px;
+  transition:transform 0.3s;
   transform-style:preserve-3d;
 }
 
@@ -55,39 +51,46 @@ h1{
   backface-visibility:hidden;
   border-radius:12px;
   display:flex;
+  flex-direction:column;
   justify-content:center;
   align-items:center;
   padding:15px;
   box-shadow:0 4px 10px rgba(0,0,0,0.1);
-  font-size:18px;
 }
 
 .card-front{
   background:white;
 }
 
+.card-front img{
+  width:70px;
+  margin-bottom:10px;
+}
+
 .card-back{
   transform:rotateY(180deg);
   color:white;
+  font-weight:bold;
 }
 
-.red{
-  background:#e74c3c;
-}
+.red{ background:#e74c3c; }
+.green{ background:#2ecc71; }
 
-.green{
-  background:#2ecc71;
+.summary{
+  margin-top:20px;
+  font-size:18px;
+  font-weight:bold;
 }
 </style>
 </head>
 
 <body>
 
-<h1>BagSafe</h1>
+<h1>BagSafe - Dangerous Goods Check</h1>
 
-<select id="languageSelect" onchange="changeLanguage()" class="lang-btn">
-<option value="th">🇹🇭 ไทย</option>
+<select id="languageSelect" onchange="changeLanguage()">
 <option value="en">🇬🇧 English</option>
+<option value="th">🇹🇭 ไทย</option>
 <option value="cn">🇨🇳 中文</option>
 <option value="jp">🇯🇵 日本語</option>
 <option value="kr">🇰🇷 한국어</option>
@@ -99,106 +102,100 @@ h1{
 <option value="ar">🇸🇦 العربية</option>
 </select>
 
-<div class="container">
+<div class="container" id="cardContainer"></div>
 
-<div class="card" onclick="flipCard(this,'pb')">
-<div class="card-inner">
-<div class="card-front" id="pb-front">Power Bank ใส่กระเป๋าโหลดได้ไหม?</div>
-<div class="card-back red" id="pb-back">❌ ห้ามใส่ในกระเป๋าโหลด</div>
-</div>
-</div>
-
-<div class="card" onclick="flipCard(this,'cl')">
-<div class="card-inner">
-<div class="card-front" id="cl-front">Power Bank ใส่กระเป๋าถือขึ้นเครื่องได้ไหม?</div>
-<div class="card-back green" id="cl-back">✅ สามารถถือขึ้นเครื่องได้</div>
-</div>
-</div>
-
+<div class="summary" id="summaryText">
+Selected dangerous items: 0
 </div>
 
 <script>
 
+const items = [
+{key:"explosives", img:"https://cdn-icons-png.flaticon.com/512/684/684908.png"},
+{key:"gas", img:"https://cdn-icons-png.flaticon.com/512/1046/1046784.png"},
+{key:"flammable_liquid", img:"https://cdn-icons-png.flaticon.com/512/3075/3075977.png"},
+{key:"flammable_solid", img:"https://cdn-icons-png.flaticon.com/512/833/833472.png"},
+{key:"oxidizing", img:"https://cdn-icons-png.flaticon.com/512/565/565547.png"},
+{key:"poison", img:"https://cdn-icons-png.flaticon.com/512/564/564619.png"},
+{key:"radioactive", img:"https://cdn-icons-png.flaticon.com/512/2965/2965567.png"},
+{key:"corrosive", img:"https://cdn-icons-png.flaticon.com/512/2913/2913604.png"},
+{key:"misc", img:"https://cdn-icons-png.flaticon.com/512/565/565350.png"}
+];
+
 const translations = {
-th:{
-pb_front:"Power Bank ใส่กระเป๋าโหลดได้ไหม?",
-pb_back:"❌ ห้ามใส่ในกระเป๋าโหลด",
-cl_front:"Power Bank ใส่กระเป๋าถือขึ้นเครื่องได้ไหม?",
-cl_back:"✅ สามารถถือขึ้นเครื่องได้"
-},
 en:{
-pb_front:"Can I put a power bank in checked baggage?",
-pb_back:"❌ Not allowed in checked baggage",
-cl_front:"Can I carry a power bank on board?",
-cl_back:"✅ Allowed in carry-on baggage"
+explosives:"Explosives",
+gas:"Compressed Gas",
+flammable_liquid:"Flammable Liquids",
+flammable_solid:"Flammable Solids",
+oxidizing:"Oxidising Materials",
+poison:"Poisonous / Infectious",
+radioactive:"Radioactive Materials",
+corrosive:"Corrosives",
+misc:"Misc Dangerous Goods",
+not_allowed:"❌ Not allowed on aircraft",
+summary:"Selected dangerous items: "
 },
-cn:{
-pb_front:"充电宝可以托运吗？",
-pb_back:"❌ 不可以托运",
-cl_front:"充电宝可以随身携带吗？",
-cl_back:"✅ 可以随身携带"
-},
-jp:{
-pb_front:"モバイルバッテリーを預け荷物に入れられますか？",
-pb_back:"❌ 預け荷物は禁止",
-cl_front:"機内持ち込みできますか？",
-cl_back:"✅ 持ち込み可能"
-},
-kr:{
-pb_front:"보조배터리를 위탁 수하물에 넣을 수 있나요?",
-pb_back:"❌ 위탁 수하물 금지",
-cl_front:"기내 반입 가능합니까?",
-cl_back:"✅ 기내 반입 가능"
-},
-ru:{
-pb_front:"Можно ли сдавать пауэрбанк в багаж?",
-pb_back:"❌ Запрещено в багаже",
-cl_front:"Можно ли взять в ручную кладь?",
-cl_back:"✅ Разрешено в ручной клади"
-},
-es:{
-pb_front:"¿Se puede poner la batería externa en equipaje facturado?",
-pb_back:"❌ No permitido en equipaje facturado",
-cl_front:"¿Se puede llevar en cabina?",
-cl_back:"✅ Permitido en equipaje de mano"
-},
-fr:{
-pb_front:"Peut-on mettre une batterie externe en soute ?",
-pb_back:"❌ Interdit en soute",
-cl_front:"Peut-on la prendre en cabine ?",
-cl_back:"✅ Autorisé en cabine"
-},
-de:{
-pb_front:"Darf man eine Powerbank im Aufgabegepäck mitnehmen?",
-pb_back:"❌ Im Aufgabegepäck verboten",
-cl_front:"Im Handgepäck erlaubt?",
-cl_back:"✅ Im Handgepäck erlaubt"
-},
-hi:{
-pb_front:"क्या पावर बैंक चेक-इन बैग में रख सकते हैं?",
-pb_back:"❌ चेक-इन बैग में अनुमति नहीं",
-cl_front:"क्या इसे केबिन में ले जा सकते हैं?",
-cl_back:"✅ केबिन बैग में अनुमति है"
-},
-ar:{
-pb_front:"هل يمكن وضع الباور بنك في الأمتعة المسجلة؟",
-pb_back:"❌ غير مسموح في الأمتعة المسجلة",
-cl_front:"هل يمكن حمله في المقصورة؟",
-cl_back:"✅ مسموح في الأمتعة المحمولة"
+th:{
+explosives:"วัตถุระเบิด",
+gas:"ก๊าซอัดแรงดัน",
+flammable_liquid:"ของเหลวไวไฟ",
+flammable_solid:"ของแข็งไวไฟ",
+oxidizing:"สารออกซิไดซ์",
+poison:"สารพิษ / ติดเชื้อ",
+radioactive:"สารกัมมันตรังสี",
+corrosive:"สารกัดกร่อน",
+misc:"วัตถุอันตรายอื่น ๆ",
+not_allowed:"❌ ห้ามนำขึ้นเครื่อง",
+summary:"จำนวนสิ่งของอันตรายที่เลือก: "
 }
 };
 
-function flipCard(card,type){
+let currentLang="en";
+let selectedCount=0;
+
+function createCards(){
+const container=document.getElementById("cardContainer");
+container.innerHTML="";
+items.forEach(item=>{
+container.innerHTML+=`
+<div class="card" onclick="flipCard(this)">
+<div class="card-inner">
+<div class="card-front">
+<img src="${item.img}">
+<p>${translations[currentLang][item.key]}</p>
+</div>
+<div class="card-back red">
+${translations[currentLang].not_allowed}
+</div>
+</div>
+</div>
+`;
+});
+}
+
+function flipCard(card){
+if(!card.classList.contains("flipped")){
+selectedCount++;
+}else{
+selectedCount--;
+}
 card.classList.toggle("flipped");
+updateSummary();
+}
+
+function updateSummary(){
+document.getElementById("summaryText").innerText=
+translations[currentLang].summary + selectedCount;
 }
 
 function changeLanguage(){
-const lang=document.getElementById("languageSelect").value;
-document.getElementById("pb-front").innerText=translations[lang].pb_front;
-document.getElementById("pb-back").innerText=translations[lang].pb_back;
-document.getElementById("cl-front").innerText=translations[lang].cl_front;
-document.getElementById("cl-back").innerText=translations[lang].cl_back;
+currentLang=document.getElementById("languageSelect").value;
+createCards();
+updateSummary();
 }
+
+createCards();
 
 </script>
 
