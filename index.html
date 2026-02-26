@@ -22,7 +22,6 @@ header{
   background:#111827;
   padding:15px;
   z-index:10;
-  box-shadow:0 4px 10px rgba(0,0,0,0.4);
 }
 
 h1{
@@ -35,6 +34,13 @@ h1{
   margin:6px 0;
 }
 
+select{
+  padding:6px;
+  border-radius:8px;
+  font-size:14px;
+  margin-top:5px;
+}
+
 .message{
   margin-top:8px;
   font-size:18px;
@@ -44,7 +50,7 @@ h1{
 
 .scroll-section{
   position:absolute;
-  top:170px;
+  top:210px;
   bottom:0;
   width:100%;
   overflow-y:auto;
@@ -88,16 +94,28 @@ h1{
   right:12px;
   font-size:24px;
 }
-
 </style>
 </head>
 <body>
 
 <header>
-  <h1>ระบบตรวจสอบสัมภาระโหลดใต้เครื่อง</h1>
-  <div class="instructions">
-    กรุณาเลือกสิ่งของที่อยู่ในสัมภาระที่ท่านกำลังเช็คอิน
-  </div>
+  <h1 id="title"></h1>
+  <div class="instructions" id="instruction"></div>
+
+  <select onchange="changeLang(this.value)">
+    <option value="th">🇹🇭 ไทย</option>
+    <option value="en">🇺🇸 English</option>
+    <option value="zh">🇨🇳 中文</option>
+    <option value="ja">🇯🇵 日本語</option>
+    <option value="ko">🇰🇷 한국어</option>
+    <option value="ru">🇷🇺 Русский</option>
+    <option value="es">🇪🇸 Español</option>
+    <option value="fr">🇫🇷 Français</option>
+    <option value="de">🇩🇪 Deutsch</option>
+    <option value="ar">🇸🇦 العربية</option>
+    <option value="hi">🇮🇳 हिन्दी</option>
+  </select>
+
   <div class="message" id="message"></div>
 </header>
 
@@ -107,82 +125,108 @@ h1{
 
 <script>
 
-const items = [
+let currentLang="th";
 
-{
-name:"พาวเวอร์แบงค์",
-img:"https://img.icons8.com/fluency/96/power-bank.png",
-message:"ห้ามโหลดใต้เครื่อง ต้องถือขึ้นเครื่องเท่านั้น"
+const translations={
+th:{
+title:"ระบบตรวจสอบสัมภาระโหลดใต้เครื่อง",
+instruction:"กรุณาเลือกสิ่งของที่อยู่ในสัมภาระที่ท่านกำลังเช็คอิน",
+carry:"ห้ามโหลดใต้เครื่อง ต้องถือขึ้นเครื่องเท่านั้น"
 },
-
-{
-name:"แบตเตอรี่สำรอง",
-img:"https://img.icons8.com/fluency/96/battery.png",
-message:"ห้ามโหลดใต้เครื่อง ต้องถือขึ้นเครื่องเท่านั้น"
+en:{
+title:"Checked Baggage Safety System",
+instruction:"Please select items inside your checked-in baggage",
+carry:"Prohibited in checked baggage. Must be carried on board."
 },
-
-{
-name:"บุหรี่ไฟฟ้า",
-img:"https://img.icons8.com/fluency/96/electronic-cigarette.png",
-message:"ห้ามโหลดใต้เครื่อง ต้องถือขึ้นเครื่องเท่านั้น"
+zh:{
+title:"托运行李安全系统",
+instruction:"请选择您托运行李中的物品",
+carry:"禁止托运，必须随身携带"
 },
-
-{
-name:"โน้ตบุ๊ก",
-img:"https://img.icons8.com/fluency/96/laptop.png",
-message:"อุปกรณ์ที่มีแบตเตอรี่ลิเธียม ต้องถือขึ้นเครื่อง"
+ja:{
+title:"受託手荷物安全システム",
+instruction:"受託手荷物の中の物品を選択してください",
+carry:"受託不可、機内持ち込みのみ"
 },
-
-{
-name:"ไฟแช็ก",
-img:"https://img.icons8.com/fluency/96/lighter.png",
-message:"วัตถุไวไฟ ห้ามโหลดใต้เครื่อง"
+ko:{
+title:"위탁 수하물 안전 시스템",
+instruction:"위탁 수하물 안의 물품을 선택하세요",
+carry:"위탁 불가, 기내 반입만 가능"
 },
-
-{
-name:"วัตถุไวไฟ/ระเบิด",
-img:"https://img.icons8.com/fluency/96/dynamite.png",
-message:"ห้ามโหลดใต้เครื่องโดยเด็ดขาด"
+ru:{
+title:"Система безопасности багажа",
+instruction:"Выберите предметы в зарегистрированном багаже",
+carry:"Запрещено в багаже. Только в ручной клади."
 },
-
-{
-name:"สารเคมีอันตราย",
-img:"https://img.icons8.com/fluency/96/test-tube.png",
-message:"ห้ามโหลดใต้เครื่อง"
+es:{
+title:"Sistema de Seguridad de Equipaje",
+instruction:"Seleccione artículos en su equipaje facturado",
+carry:"Prohibido en equipaje facturado. Solo en cabina."
 },
-
-{
-name:"อาวุธปืน/อุปกรณ์ช็อตไฟฟ้า",
-img:"https://img.icons8.com/fluency/96/pistol.png",
-message:"ห้ามโหลดใต้เครื่อง"
+fr:{
+title:"Système de Sécurité des Bagages",
+instruction:"Sélectionnez les articles dans votre bagage enregistré",
+carry:"Interdit en soute. Cabine uniquement."
 },
-
-{
-name:"ถังออกซิเจน",
-img:"https://img.icons8.com/fluency/96/oxygen-tank.png",
-message:"ต้องได้รับอนุญาตพิเศษก่อนเดินทาง"
+de:{
+title:"Gepäck-Sicherheitssystem",
+instruction:"Wählen Sie Gegenstände im aufgegebenen Gepäck",
+carry:"Im Aufgabegepäck verboten. Nur Handgepäck."
+},
+ar:{
+title:"نظام فحص الأمتعة",
+instruction:"يرجى اختيار العناصر في أمتعتك المسجلة",
+carry:"ممنوع في الأمتعة المسجلة. يُحمل في المقصورة فقط."
+},
+hi:{
+title:"चेक-इन सामान सुरक्षा प्रणाली",
+instruction:"अपने चेक-इन किए गए बैग में मौजूद वस्तुओं का चयन करें",
+carry:"चेक-इन बैग में प्रतिबंधित। केवल केबिन में ले जाएँ।"
 }
+};
 
+const items=[
+{name:"Powerbank",img:"https://img.icons8.com/fluency/96/power-bank.png"},
+{name:"Lithium Battery",img:"https://img.icons8.com/fluency/96/battery.png"},
+{name:"E-Cigarette",img:"https://img.icons8.com/fluency/96/electronic-cigarette.png"},
+{name:"Laptop",img:"https://img.icons8.com/fluency/96/laptop.png"},
+{name:"Lighter",img:"https://img.icons8.com/fluency/96/lighter.png"},
+{name:"Flammable/Explosive",img:"https://img.icons8.com/fluency/96/dynamite.png"},
+{name:"Chemical",img:"https://img.icons8.com/fluency/96/test-tube.png"},
+{name:"Weapon/Taser",img:"https://img.icons8.com/fluency/96/pistol.png"},
+{name:"Oxygen Tank",img:"https://img.icons8.com/fluency/96/oxygen-tank.png"}
 ];
 
 const container=document.getElementById("cardContainer");
-const messageBox=document.getElementById("message");
 
-items.forEach((item,index)=>{
-  const card=document.createElement("div");
-  card.className="card";
-  card.innerHTML=`
-    <img src="${item.img}">
-    <p>${item.name}</p>
-  `;
+function renderCards(){
+  container.innerHTML="";
+  items.forEach((item,index)=>{
+    const card=document.createElement("div");
+    card.className="card";
+    card.innerHTML=`
+      <img src="${item.img}">
+      <p>${item.name}</p>
+    `;
+    card.onclick=()=>{
+      card.classList.toggle("selected");
+      document.getElementById("message").innerText=
+        translations[currentLang].carry;
+    };
+    container.appendChild(card);
+  });
+}
 
-  card.onclick=()=>{
-    card.classList.toggle("selected");
-    messageBox.innerText=item.message;
-  };
+function changeLang(lang){
+  currentLang=lang;
+  document.getElementById("title").innerText=translations[lang].title;
+  document.getElementById("instruction").innerText=translations[lang].instruction;
+  document.getElementById("message").innerText="";
+  document.body.dir=(lang==="ar")?"rtl":"ltr";
+}
 
-  container.appendChild(card);
-});
+changeLang("th");
+renderCards();
 
 </script>
 
