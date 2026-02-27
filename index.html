@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Smart Airport Kiosk 4.0 PRO</title>
+<title>Smart Airport Kiosk PRO</title>
 
 <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;600&family=Inter:wght@300;500;600&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -15,7 +15,6 @@ margin:0;
 background:linear-gradient(135deg,#0f172a,#1e293b);
 color:white;
 text-align:center;
-overflow-x:hidden;
 }
 
 /* TOP BAR */
@@ -38,7 +37,6 @@ border:none;
 background:#1f2937;
 color:white;
 font-size:15px;
-cursor:pointer;
 }
 
 /* HEADER */
@@ -47,11 +45,46 @@ padding:30px 20px;
 position:relative;
 }
 
-.logo{
-font-size:20px;
-font-weight:600;
-opacity:.8;
+.menu-btn{
+position:absolute;
+left:30px;
+top:30px;
+font-size:26px;
+background:none;
+border:none;
+color:white;
+cursor:pointer;
 }
+
+.dropdown{
+display:none;
+position:absolute;
+left:30px;
+top:70px;
+background:#1f2937;
+border-radius:12px;
+padding:10px;
+min-width:180px;
+box-shadow:0 10px 25px rgba(0,0,0,.4);
+z-index:30;
+}
+
+.dropdown button{
+width:100%;
+background:none;
+border:none;
+color:white;
+text-align:left;
+padding:8px;
+border-radius:8px;
+cursor:pointer;
+}
+
+.dropdown button:hover{
+background:#374151;
+}
+
+.logo{font-size:20px;font-weight:600;opacity:.8}
 
 .clock{
 position:absolute;
@@ -61,28 +94,11 @@ font-size:15px;
 opacity:.8;
 }
 
-.menu-btn{
-position:absolute;
-left:30px;
-top:30px;
-font-size:20px;
-background:none;
-border:none;
-color:white;
-cursor:pointer;
-}
-
 h1{font-size:30px;margin:10px 0}
 #instruction{opacity:.8;margin-bottom:20px}
 .message{font-size:22px;min-height:40px;font-weight:500}
 
-.alert{
-color:#ff4d4d;
-animation:blink .6s infinite alternate;
-}
-@keyframes blink{from{opacity:1}to{opacity:.4}}
-
-/* CARD GRID */
+/* CARDS */
 .card-group{
 display:grid;
 grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
@@ -91,7 +107,7 @@ padding:30px;
 }
 
 .card{
-background:rgba(31,41,55,.9);
+background:rgba(31,41,55,.8);
 border-radius:25px;
 height:220px;
 display:flex;
@@ -117,6 +133,7 @@ margin:30px;
 padding:30px;
 border-radius:20px;
 }
+
 button{
 padding:8px 14px;
 border:none;
@@ -129,23 +146,30 @@ cursor:pointer;
 <body>
 
 <div class="language-bar">
-<select onchange="changeLang(this.value)" id="langSelect">
+<select onchange="changeLang(this.value)">
 <option value="th">🇹🇭 ไทย</option>
 <option value="en">🇺🇸 English</option>
-<option value="zh">🇨🇳 中文</option>
-<option value="ja">🇯🇵 日本語</option>
-<option value="ko">🇰🇷 한국어</option>
-<option value="es">🇪🇸 Español</option>
-<option value="fr">🇫🇷 Français</option>
-<option value="de">🇩🇪 Deutsch</option>
-<option value="ru">🇷🇺 Русский</option>
-<option value="ar">🇸🇦 العربية</option>
-<option value="hi">🇮🇳 हिन्दी</option>
+<option value="zh-CN">🇨🇳 中文</option>
+<option value="ja-JP">🇯🇵 日本語</option>
+<option value="ko-KR">🇰🇷 한국어</option>
+<option value="es-ES">🇪🇸 Español</option>
+<option value="fr-FR">🇫🇷 Français</option>
+<option value="de-DE">🇩🇪 Deutsch</option>
+<option value="ru-RU">🇷🇺 Русский</option>
+<option value="ar-SA">🇸🇦 العربية</option>
+<option value="hi-IN">🇮🇳 हिन्दी</option>
 </select>
 </div>
 
 <header>
-<button class="menu-btn" onclick="openAdmin()">📊</button>
+<button class="menu-btn" onclick="toggleMenu()">☰</button>
+
+<div class="dropdown" id="menu">
+<button onclick="openAdmin()">📊 Admin</button>
+<button onclick="toggleFullscreen()">🖥 Fullscreen</button>
+<button onclick="resetAll()">🔄 Reset</button>
+</div>
+
 <div class="logo">✈ SMART AIRPORT SYSTEM</div>
 <div class="clock" id="clock"></div>
 <h1 id="title"></h1>
@@ -165,170 +189,121 @@ cursor:pointer;
 <script>
 
 /* CLOCK */
-setInterval(()=>{
+function updateClock(){
 document.getElementById("clock").innerText=
 new Date().toLocaleTimeString();
-},1000);
-
-/* SOUND */
-const alertSound=new Audio("https://actions.google.com/sounds/v1/alarms/alarm_clock.ogg");
-const infoSound=new Audio("https://actions.google.com/sounds/v1/cartoon/wood_plank_flicks.ogg");
-
-/* SPEECH ENGINE */
-let voices=[];
-let currentLang="th";
-let speechUnlocked=false;
-
-function loadVoices(){
-voices=speechSynthesis.getVoices();
 }
-speechSynthesis.onvoiceschanged=loadVoices;
-loadVoices();
+setInterval(updateClock,1000);
+updateClock();
 
-function unlockSpeech(){
-if(!speechUnlocked){
-speechSynthesis.speak(new SpeechSynthesisUtterance(" "));
-speechUnlocked=true;
-}
-}
-
-function speak(text){
-unlockSpeech();
-speechSynthesis.cancel();
-let utter=new SpeechSynthesisUtterance(text);
-utter.lang=langMap[currentLang];
-let match=voices.find(v=>v.lang.startsWith(langMap[currentLang].split("-")[0]));
-if(match) utter.voice=match;
-utter.rate=0.95;
-speechSynthesis.speak(utter);
-}
-
-const langMap={
-th:"th-TH",en:"en-US",zh:"zh-CN",ja:"ja-JP",ko:"ko-KR",
-es:"es-ES",fr:"fr-FR",de:"de-DE",ru:"ru-RU",ar:"ar-SA",hi:"hi-IN"
-};
-
-/* TRANSLATIONS 11 LANG */
+/* LANGUAGE DATA */
 const translations={
-th:{title:"สิ่งของห้ามโหลดใต้ท้องเครื่อง",instruction:"กรุณาเลือกสิ่งของ",
-items:["พาวเวอร์แบงค์","แบตเตอรี่","บุหรี่ไฟฟ้า","โน้ตบุ๊ก","ไฟแช็ก","วัตถุระเบิด","สารเคมี","อาวุธ","ไม่แน่ใจ"],
-warning:"ห้ามโหลดใต้ท้องเครื่อง กรุณาถือขึ้นเครื่อง",ask:"กรุณาสอบถามเจ้าหน้าที่"},
-en:{title:"Prohibited Items",instruction:"Select an item",
-items:["Power Bank","Battery","E-Cigarette","Laptop","Lighter","Explosives","Chemical","Weapon","Unsure Item"],
-warning:"Not permitted in checked baggage",ask:"Please ask airport staff"},
-zh:{title:"禁止物品",instruction:"请选择物品",
-items:["充电宝","电池","电子烟","笔记本","打火机","爆炸物","化学品","武器","不确定"],
-warning:"禁止托运",ask:"请咨询工作人员"},
-ja:{title:"禁止品",instruction:"物品を選択",
-items:["モバイルバッテリー","電池","電子タバコ","ノートPC","ライター","爆発物","化学物質","武器","不明"],
-warning:"受託不可",ask:"スタッフに確認してください"},
-ko:{title:"금지 품목",instruction:"물품 선택",
-items:["보조배터리","배터리","전자담배","노트북","라이터","폭발물","화학물질","무기","불확실"],
-warning:"위탁 수하물 금지",ask:"직원에게 문의하세요"},
-es:{title:"Artículos Prohibidos",instruction:"Seleccione un artículo",
-items:["Power Bank","Batería","Cigarrillo electrónico","Portátil","Encendedor","Explosivos","Químico","Arma","Dudoso"],
-warning:"No permitido en equipaje facturado",ask:"Consulte al personal"},
-fr:{title:"Objets Interdits",instruction:"Sélectionnez un objet",
-items:["Power Bank","Batterie","Cigarette électronique","Ordinateur","Briquet","Explosifs","Produit chimique","Arme","Incertain"],
-warning:"Interdit en soute",ask:"Demandez au personnel"},
-de:{title:"Verbotene Gegenstände",instruction:"Artikel auswählen",
-items:["Powerbank","Batterie","E-Zigarette","Laptop","Feuerzeug","Explosivstoffe","Chemikalie","Waffe","Unsicher"],
-warning:"Nicht im Aufgabegepäck erlaubt",ask:"Personal fragen"},
-ru:{title:"Запрещенные предметы",instruction:"Выберите предмет",
-items:["Пауэрбанк","Батарея","Эл. сигарета","Ноутбук","Зажигалка","Взрывчатка","Химикат","Оружие","Не уверен"],
-warning:"Запрещено в багаже",ask:"Обратитесь к сотруднику"},
-ar:{title:"مواد محظورة",instruction:"اختر العنصر",
-items:["باور بنك","بطارية","سيجارة إلكترونية","كمبيوتر","ولاعة","متفجرات","مواد كيميائية","سلاح","غير مؤكد"],
-warning:"ممنوع في الأمتعة المسجلة",ask:"يرجى سؤال الموظف"},
-hi:{title:"प्रतिबंधित वस्तुएँ",instruction:"वस्तु चुनें",
-items:["पावर बैंक","बैटरी","ई-सिगरेट","लैपटॉप","लाइटर","विस्फोटक","रसायन","हथियार","अनिश्चित"],
-warning:"चेक-इन बैगेज में अनुमति नहीं",ask:"कृपया स्टाफ से पूछें"}
+"th":{title:"กรุณาเลือกบริการ",instruction:"แตะเพื่อเริ่มต้น"},
+"en":{title:"Please Select Service",instruction:"Tap to begin"},
+"zh-CN":{title:"请选择服务",instruction:"点击开始"},
+"ja-JP":{title:"サービスを選択してください",instruction:"タップして開始"},
+"ko-KR":{title:"서비스를 선택하세요",instruction:"터치하여 시작"},
+"es-ES":{title:"Seleccione Servicio",instruction:"Toque para comenzar"},
+"fr-FR":{title:"Veuillez sélectionner un service",instruction:"Appuyez pour commencer"},
+"de-DE":{title:"Bitte Service auswählen",instruction:"Tippen zum Starten"},
+"ru-RU":{title:"Выберите услугу",instruction:"Нажмите чтобы начать"},
+"ar-SA":{title:"يرجى اختيار الخدمة",instruction:"اضغط للبدء"},
+"hi-IN":{title:"कृपया सेवा चुनें",instruction:"शुरू करने के लिए टैप करें"}
 };
 
-/* RENDER */
-function renderCards(){
-let container=document.getElementById("cards");
-container.innerHTML="";
-translations[currentLang].items.forEach((item,i)=>{
-let card=document.createElement("div");
-card.className="card";
-card.innerHTML="<p>"+item+"</p>";
-card.onclick=()=>selectItem(i);
-container.appendChild(card);
-});
-}
+let currentLang="th";
 
-function selectItem(i){
-saveStat(i);
-document.querySelectorAll(".card").forEach(c=>c.classList.remove("selected"));
-document.querySelectorAll(".card")[i].classList.add("selected");
+/* SERVICES */
+const services=["Check-in","Flight Status","Boarding Pass","Airport Map"];
+let stats={};
 
-let data=translations[currentLang];
-let msg=document.getElementById("message");
-
-if(i===8){
-msg.innerText=data.ask;
-msg.classList.remove("alert");
-infoSound.play();
-speak(data.ask);
-}else{
-msg.innerText=data.warning;
-msg.classList.add("alert");
-alertSound.play();
-speak(data.warning);
-}
-
-setTimeout(resetAll,15000);
+/* INIT */
+function init(){
+changeLang("th");
+renderCards();
 }
 
 function changeLang(lang){
 currentLang=lang;
 document.getElementById("title").innerText=translations[lang].title;
 document.getElementById("instruction").innerText=translations[lang].instruction;
-renderCards();
-resetAll();
+speak(translations[lang].title);
 }
 
-let chart;
-function saveStat(i){
-let stats=JSON.parse(localStorage.getItem("stats")||"{}");
-stats[i]=(stats[i]||0)+1;
-localStorage.setItem("stats",JSON.stringify(stats));
+/* VOICE */
+function speak(text){
+let speech=new SpeechSynthesisUtterance(text);
+speech.lang=currentLang;
+window.speechSynthesis.cancel();
+window.speechSynthesis.speak(speech);
 }
 
-function renderChart(){
-let stats=JSON.parse(localStorage.getItem("stats")||"{}");
-let labels=translations[currentLang].items;
-let data=labels.map((_,i)=>stats[i]||0);
-
-if(chart) chart.destroy();
-chart=new Chart(document.getElementById("chart"),{
-type:"bar",
-data:{labels:labels,datasets:[{label:"Usage",data:data,backgroundColor:"#3b82f6"}]}
+/* CARDS */
+function renderCards(){
+let container=document.getElementById("cards");
+container.innerHTML="";
+services.forEach(service=>{
+let div=document.createElement("div");
+div.className="card";
+div.innerText=service;
+div.onclick=(e)=>selectService(service,e);
+container.appendChild(div);
 });
 }
 
-function clearStats(){
-localStorage.removeItem("stats");
+function selectService(service,e){
+document.querySelectorAll(".card").forEach(c=>c.classList.remove("selected"));
+e.target.classList.add("selected");
+document.getElementById("message").innerText=service+" Selected";
+speak(service+" Selected");
+stats[service]=(stats[service]||0)+1;
+}
+
+/* MENU */
+function toggleMenu(){
+let m=document.getElementById("menu");
+m.style.display=m.style.display==="block"?"none":"block";
+}
+
+function toggleFullscreen(){
+if(!document.fullscreenElement){
+document.documentElement.requestFullscreen();
+}else{
+document.exitFullscreen();
+}
+}
+
+/* ADMIN */
+function openAdmin(){
+document.getElementById("adminPanel").style.display="block";
 renderChart();
 }
 
-function openAdmin(){
-let pass=prompt("Enter Admin Password:");
-if(pass==="1234"){
-let panel=document.getElementById("adminPanel");
-panel.style.display=panel.style.display==="block"?"none":"block";
+function clearStats(){
+stats={};
 renderChart();
 }
+
+function renderChart(){
+let ctx=document.getElementById("chart");
+new Chart(ctx,{
+type:"bar",
+data:{
+labels:Object.keys(stats),
+datasets:[{
+label:"Usage Count",
+data:Object.values(stats)
+}]
+}
+});
 }
 
 function resetAll(){
-document.querySelectorAll(".card").forEach(c=>c.classList.remove("selected"));
-document.getElementById("message").innerText="";
+location.reload();
 }
 
-changeLang("th");
-</script>
+init();
 
+</script>
 </body>
 </html>
