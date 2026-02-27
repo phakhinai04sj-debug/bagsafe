@@ -3,55 +3,47 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Smart Airport Kiosk PRO 5.0</title>
+<title>Smart Airport Kiosk</title>
 
 <style>
-*{box-sizing:border-box;margin:0;padding:0}
-
 body{
+  margin:0;
   font-family:Arial, sans-serif;
-  background:#0b1220;
+  background:#0f172a;
   color:white;
   text-align:center;
-  overflow-x:hidden;
 }
 
-/* ================= HEADER ================= */
-
+/* HEADER */
 header{
-  background:#111827;
-  padding:80px 20px 25px;
-  position:sticky;
-  top:0;
-  z-index:100;
+  background:#1e293b;
+  padding:25px 15px 40px;
+  position:relative;
 }
 
 h1{
-  font-size:clamp(20px,4vw,30px);
-  margin-bottom:8px;
+  margin-top:40px;
+  font-size:26px;
 }
 
 #instruction{
-  font-size:clamp(14px,2.5vw,18px);
-  opacity:.9;
+  margin-top:10px;
+  opacity:.8;
 }
 
-.top-bar{
+/* MENU RIGHT */
+.menu-btn{
   position:absolute;
   top:15px;
   right:20px;
-}
-
-.menu-btn{
-  font-size:28px;
+  font-size:26px;
   background:none;
   border:none;
   color:white;
   cursor:pointer;
 }
 
-/* ===== LANGUAGE CENTER ===== */
-
+/* LANGUAGE CENTER */
 .lang-center{
   position:absolute;
   top:15px;
@@ -65,169 +57,45 @@ h1{
   border:none;
   color:white;
   cursor:pointer;
-  transition:.3s;
-}
-
-.lang-btn:hover{
-  transform:scale(1.2);
 }
 
 .lang-dropdown{
   position:absolute;
   top:45px;
   left:50%;
-  transform:translateX(-50%) scale(.95);
+  transform:translateX(-50%);
   background:#1f2937;
-  border-radius:14px;
+  border-radius:12px;
   padding:10px;
   min-width:230px;
-  box-shadow:0 8px 25px rgba(0,0,0,.5);
-  opacity:0;
-  pointer-events:none;
-  transition:.25s;
-}
-
-.lang-dropdown.show{
-  opacity:1;
-  pointer-events:auto;
-  transform:translateX(-50%) scale(1);
+  display:none;
 }
 
 .lang-dropdown button{
   width:100%;
-  padding:9px;
-  border:none;
+  padding:8px;
   background:none;
+  border:none;
   color:white;
   text-align:left;
-  border-radius:8px;
   cursor:pointer;
+  border-radius:8px;
 }
 
 .lang-dropdown button:hover{
   background:#374151;
 }
-
-/* ===== RIGHT MENU ===== */
-
-.dropdown{
-  display:none;
-  position:absolute;
-  right:0;
-  top:45px;
-  background:#1f2937;
-  border-radius:12px;
-  padding:10px;
-  min-width:200px;
-}
-
-.dropdown button{
-  width:100%;
-  padding:10px;
-  background:none;
-  border:none;
-  color:white;
-  text-align:left;
-  cursor:pointer;
-  border-radius:8px;
-}
-
-.dropdown button:hover{
-  background:#374151;
-}
-
-/* ================= CARDS ================= */
-
-.card-group{
-  display:grid;
-  grid-template-columns:repeat(auto-fit,minmax(180px,1fr));
-  gap:20px;
-  padding:30px;
-}
-
-.card{
-  background:#1f2937;
-  border-radius:20px;
-  min-height:180px;
-  padding:15px;
-  display:flex;
-  justify-content:center;
-  align-items:center;
-  cursor:pointer;
-  transition:.3s;
-  font-size:clamp(14px,2vw,18px);
-  text-align:center;
-  word-wrap:break-word;
-}
-
-.card:hover{
-  transform:scale(1.05);
-  background:#334155;
-}
-
-.card.selected{
-  background:#b91c1c;
-}
-
-/* ================= MESSAGE ================= */
-
-.message{
-  font-size:clamp(18px,3vw,24px);
-  min-height:40px;
-  margin-top:10px;
-}
-
-.alert{
-  color:#ff3b3b;
-  animation:blink .6s infinite alternate;
-}
-
-@keyframes blink{
-  from{opacity:1}
-  to{opacity:.5}
-}
-
-/* ================= ADMIN ================= */
-
-.admin-panel{
-  display:none;
-  background:#1f2937;
-  margin:20px;
-  padding:20px;
-  border-radius:15px;
-}
-
-table{
-  width:100%;
-  border-collapse:collapse;
-  margin-top:10px;
-}
-
-td,th{
-  border:1px solid #374151;
-  padding:8px;
-}
-
 </style>
 </head>
 
-<body onclick="unlockAudio()">
+<body>
 
 <header>
 
-<!-- RIGHT MENU -->
-<div class="top-bar">
-  <button class="menu-btn" onclick="toggleMenu()">☰</button>
-  <div class="dropdown" id="menu">
-    <button onclick="openAdmin()">📊 Admin</button>
-    <button onclick="toggleFullscreen()">🖥 Fullscreen</button>
-    <button onclick="resetAll()">🔄 Reset</button>
-  </div>
-</div>
+<button class="menu-btn">☰</button>
 
-<!-- CENTER LANGUAGE -->
 <div class="lang-center">
-  <button class="lang-btn" onclick="toggleLangMenu()">🌐</button>
+  <button class="lang-btn" onclick="toggleLang()">🌐</button>
   <div class="lang-dropdown" id="langMenu">
     <button onclick="changeLang('th')">🇹🇭 ไทย</button>
     <button onclick="changeLang('en')">🇺🇸 English</button>
@@ -245,185 +113,110 @@ td,th{
 
 <h1 id="title"></h1>
 <div id="instruction"></div>
-<div class="message" id="message"></div>
 
 </header>
 
-<div class="card-group" id="cards"></div>
-
-<div class="admin-panel" id="adminPanel">
-<h2>Statistics</h2>
-<table id="statsTable"></table>
-<button onclick="clearStats()">Clear Data</button>
-</div>
-
 <script>
 
-/* ================= LANGUAGE ================= */
+/* -------------------------------
+   11 LANGUAGE + SOFT VOICE
+-------------------------------- */
 
 let currentLang="th";
-let resetTimer=null;
-const adminPassword="1234";
-
-const langMap={
-th:"th-TH", en:"en-US", zh:"zh-CN", ja:"ja-JP", ko:"ko-KR",
-es:"es-ES", fr:"fr-FR", de:"de-DE", ru:"ru-RU",
-ar:"ar-SA", hi:"hi-IN"
-};
-
-const translations={
-th:{title:"สิ่งของห้ามโหลดใต้ท้องเครื่อง",instruction:"กรุณาเลือกสิ่งของ",
-items:["พาวเวอร์แบงค์","แบตเตอรี่","บุหรี่ไฟฟ้า","โน้ตบุ๊ก","ไฟแช็ก","วัตถุระเบิด","สารเคมี","อาวุธ","ไม่แน่ใจ"],
-warning:"❌ ห้ามโหลดใต้เครื่อง",warningSpeak:"ไม่สามารถโหลดใต้ท้องเครื่องได้ กรุณาถือขึ้นเครื่อง",
-ask:"⚠ โปรดสอบถามเจ้าหน้าที่",askSpeak:"กรุณาสอบถามเจ้าหน้าที่"},
-en:{title:"Prohibited Items",instruction:"Select an item",
-items:["Power Bank","Battery","E-Cigarette","Laptop","Lighter","Explosives","Chemical","Weapon","Unsure Item"],
-warning:"❌ Prohibited",warningSpeak:"This item is not permitted in checked baggage.",
-ask:"⚠ Ask staff",askSpeak:"Please ask airport staff."}
-};
-
-/* ================= AUDIO ENGINE ================= */
-
 let voices=[];
 let voicesReady=false;
-let audioUnlocked=false;
-let queue=[];
-let speaking=false;
 
-function initVoices(){
-  function load(){
-    voices=speechSynthesis.getVoices();
-    if(voices.length>0){voicesReady=true;}
-    else{setTimeout(load,200);}
-  }
-  load();
-}
-speechSynthesis.onvoiceschanged=initVoices;
-initVoices();
-
-function unlockAudio(){
-  if(!audioUnlocked){
-    let temp=new SpeechSynthesisUtterance("");
-    speechSynthesis.speak(temp);
-    speechSynthesis.cancel();
-    audioUnlocked=true;
+/* โหลดเสียง */
+function loadVoices(){
+  voices=speechSynthesis.getVoices();
+  if(voices.length>0){
+    voicesReady=true;
+  }else{
+    setTimeout(loadVoices,200);
   }
 }
+speechSynthesis.onvoiceschanged=loadVoices;
+loadVoices();
 
-function getVoice(){
-  let code=langMap[currentLang];
-  let short=code.split("-")[0];
-  let filtered=voices.filter(v=>v.lang.startsWith(short));
-  return filtered[0]||voices[0];
+/* Dictionary 11 ภาษา */
+const translations={
+  th:{title:"ตู้บริการอัจฉริยะ",instruction:"กรุณาเลือกบริการ",welcome:"ยินดีต้อนรับ"},
+  en:{title:"Smart Airport Kiosk",instruction:"Please select a service",welcome:"Welcome"},
+  zh:{title:"智能机场终端",instruction:"请选择服务",welcome:"欢迎"},
+  ja:{title:"スマート空港端末",instruction:"サービスを選択してください",welcome:"ようこそ"},
+  ko:{title:"스마트 공항 키오스크",instruction:"서비스를 선택하세요",welcome:"환영합니다"},
+  es:{title:"Quiosco Inteligente",instruction:"Seleccione un servicio",welcome:"Bienvenido"},
+  fr:{title:"Borne Aéroport",instruction:"Veuillez sélectionner un service",welcome:"Bienvenue"},
+  de:{title:"Intelligenter Flughafen Kiosk",instruction:"Bitte wählen Sie einen Service",welcome:"Willkommen"},
+  ru:{title:"Умный терминал аэропорта",instruction:"Выберите услугу",welcome:"Добро пожаловать"},
+  ar:{title:"كشك المطار الذكي",instruction:"يرجى اختيار الخدمة",welcome:"مرحبا بك"},
+  hi:{title:"स्मार्ट एयरपोर्ट कियोस्क",instruction:"कृपया सेवा चुनें",welcome:"स्वागत है"}
+};
+
+/* เปลี่ยนภาษา */
+function changeLang(lang){
+  currentLang=lang;
+
+  document.getElementById("title").innerText=translations[lang].title;
+  document.getElementById("instruction").innerText=translations[lang].instruction;
+
+  speakSoft(translations[lang].welcome);
+
+  document.getElementById("langMenu").style.display="none";
 }
 
-function speak(text){
-  queue.push(text);
-  if(!speaking) processQueue();
-}
+/* เสียงนุ่มนวล */
+function speakSoft(text){
+  if(!voicesReady){
+    setTimeout(()=>speakSoft(text),300);
+    return;
+  }
 
-function processQueue(){
-  if(queue.length===0){speaking=false;return;}
-  if(!voicesReady){setTimeout(processQueue,300);return;}
-
-  speaking=true;
   speechSynthesis.cancel();
-  let utter=new SpeechSynthesisUtterance(queue.shift());
-  utter.lang=langMap[currentLang];
-  utter.voice=getVoice();
-  utter.rate=0.95;
 
-  utter.onend=()=>processQueue();
-  utter.onerror=()=>setTimeout(()=>speechSynthesis.speak(utter),200);
+  const utter=new SpeechSynthesisUtterance(text);
+
+  const langShort=currentLang;
+
+  let voice=voices.find(v=>v.lang.toLowerCase().startsWith(langShort));
+
+  if(!voice){
+    voice=voices.find(v=>v.lang.toLowerCase().startsWith("en"));
+  }
+
+  if(voice){
+    utter.voice=voice;
+    utter.lang=voice.lang;
+  }
+
+  utter.rate=0.9;   // ช้าลง = นุ่มขึ้น
+  utter.pitch=1;    
+  utter.volume=1;
 
   speechSynthesis.speak(utter);
 }
 
-/* ================= UI ================= */
-
-function renderCards(){
-  let container=document.getElementById("cards");
-  container.innerHTML="";
-  translations[currentLang].items.forEach((item,i)=>{
-    let card=document.createElement("div");
-    card.className="card";
-    card.innerHTML="<p>"+item+"</p>";
-    card.onclick=()=>selectItem(i);
-    container.appendChild(card);
-  });
-}
-
-function selectItem(i){
-  document.querySelectorAll(".card").forEach(c=>c.classList.remove("selected"));
-  document.querySelectorAll(".card")[i].classList.add("selected");
-
-  let data=translations[currentLang];
-  let msg=document.getElementById("message");
-
-  if(i===8){
-    msg.innerText=data.ask;
-    msg.classList.remove("alert");
-    speak(data.askSpeak);
-  }else{
-    msg.innerText=data.warning;
-    msg.classList.add("alert");
-    speak(data.warningSpeak);
-  }
-
-  clearTimeout(resetTimer);
-  resetTimer=setTimeout(resetAll,15000);
-}
-
-function changeLang(lang){
-  currentLang=lang;
-  document.body.dir=(lang==="ar")?"rtl":"ltr";
-  document.getElementById("title").innerText=translations[lang].title;
-  document.getElementById("instruction").innerText=translations[lang].instruction;
-  renderCards();
-  resetAll();
-  speak(translations[lang].instruction);
-  toggleLangMenu();
-}
-
-function resetAll(){
-  document.querySelectorAll(".card").forEach(c=>c.classList.remove("selected"));
-  document.getElementById("message").innerText="";
-}
-
-function toggleMenu(){
-  let m=document.getElementById("menu");
+/* เมนูภาษา */
+function toggleLang(){
+  const m=document.getElementById("langMenu");
   m.style.display=m.style.display==="block"?"none":"block";
 }
 
-function toggleLangMenu(){
-  document.getElementById("langMenu").classList.toggle("show");
-}
-
+/* ปิดเมนูเมื่อคลิกที่อื่น */
 document.addEventListener("click",function(e){
-  if(!e.target.closest(".lang-center")){
-    document.getElementById("langMenu").classList.remove("show");
-  }
-  if(!e.target.closest(".top-bar")){
-    document.getElementById("menu").style.display="none";
+  const menu=document.getElementById("langMenu");
+  const btn=document.querySelector(".lang-btn");
+  if(!menu.contains(e.target)&&!btn.contains(e.target)){
+    menu.style.display="none";
   }
 });
 
-function toggleFullscreen(){
-  document.documentElement.requestFullscreen();
-}
-
-function openAdmin(){
-  let pass=prompt("Enter Admin Password:");
-  if(pass===adminPassword){
-    let panel=document.getElementById("adminPanel");
-    panel.style.display=panel.style.display==="block"?"none":"block";
-  }else{
-    alert("Wrong password");
-  }
-}
-
-changeLang("th");
+/* เริ่มต้น */
+window.onload=function(){
+  changeLang("th");
+};
 
 </script>
+
 </body>
 </html>
