@@ -2,8 +2,8 @@
 <html lang="th">
 <head>
 <meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Airport Baggage Kiosk - Production</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Smart Airport Kiosk 2.1</title>
 
 <style>
 *{box-sizing:border-box}
@@ -14,29 +14,30 @@ body{
   color:#fff;
   text-align:center;
 }
-
 header{
   background:#111827;
-  padding:70px 20px 20px 20px;
+  padding:70px 20px 20px;
   position:sticky;
   top:0;
   z-index:10;
 }
-
 .top-bar{
   position:absolute;
   top:15px;
   right:20px;
 }
-
-.menu-btn{
-  font-size:28px;
-  background:none;
+button,select{
+  padding:8px 12px;
+  border-radius:10px;
   border:none;
-  color:white;
+  margin:5px;
   cursor:pointer;
 }
-
+.menu-btn{
+  font-size:26px;
+  background:none;
+  color:white;
+}
 .dropdown{
   display:none;
   position:absolute;
@@ -45,51 +46,15 @@ header{
   background:#1f2937;
   border-radius:12px;
   padding:10px;
-  min-width:190px;
-  box-shadow:0 5px 20px rgba(0,0,0,0.6);
+  min-width:200px;
 }
-
 .dropdown button{
   width:100%;
   background:none;
-  border:none;
   color:white;
-  padding:10px;
   text-align:left;
-  cursor:pointer;
-  border-radius:8px;
 }
-
-.dropdown button:hover{
-  background:#374151;
-}
-
-h1{margin:5px 0;color:#ff2d2d}
-.instructions{margin:8px 0;font-size:18px}
-
-select{
-  padding:8px 12px;
-  border-radius:10px;
-  border:none;
-  margin:5px;
-}
-
-.message{
-  margin-top:15px;
-  font-weight:bold;
-  min-height:50px;
-  font-size:20px;
-}
-
-.message.alert{
-  color:#ff3b3b;
-  animation:blink 0.6s infinite alternate;
-}
-
-@keyframes blink{
-  from{opacity:1}
-  to{opacity:0.5}
-}
+.dropdown button:hover{background:#374151}
 
 .card-group{
   display:grid;
@@ -97,21 +62,23 @@ select{
   gap:25px;
   padding:30px;
 }
-
 .card{
   background:#1f2937;
   border-radius:20px;
   height:220px;
   display:flex;
-  flex-direction:column;
   justify-content:center;
   align-items:center;
   cursor:pointer;
-  transition:0.3s;
+  transition:.3s;
+  font-size:18px;
 }
-
 .card:hover{transform:scale(1.05)}
 .card.selected{background:#b91c1c}
+
+.message{font-size:22px;min-height:50px;margin-top:10px}
+.alert{color:#ff3b3b;animation:blink .6s infinite alternate}
+@keyframes blink{from{opacity:1}to{opacity:.5}}
 
 .admin-panel{
   display:none;
@@ -120,35 +87,26 @@ select{
   padding:20px;
   border-radius:15px;
 }
-
-.admin-panel table{
-  width:100%;
-  border-collapse:collapse;
-}
-
-.admin-panel th,.admin-panel td{
-  border:1px solid #374151;
-  padding:8px;
-}
+table{width:100%;border-collapse:collapse}
+td,th{border:1px solid #374151;padding:8px}
 </style>
 </head>
 <body>
 
 <header>
-
 <div class="top-bar">
-  <button class="menu-btn" onclick="toggleMenu()">☰</button>
-  <div class="dropdown" id="menuDropdown">
-    <button onclick="toggleAdmin()">📊 Admin Panel</button>
-    <button onclick="document.documentElement.requestFullscreen()">🖥 Full Screen</button>
-    <button onclick="resetAll()">🔄 Reset</button>
-  </div>
+<button class="menu-btn" onclick="toggleMenu()">☰</button>
+<div class="dropdown" id="menu">
+<button onclick="openAdmin()">📊 Admin</button>
+<button onclick="toggleFullscreen()">🖥 Fullscreen</button>
+<button onclick="resetAll()">🔄 Reset</button>
+</div>
 </div>
 
 <h1 id="title"></h1>
-<div class="instructions" id="instruction"></div>
+<div id="instruction"></div>
 
-<select onchange="changeLang(this.value)">
+<select onchange="changeLang(this.value)" id="langSelect">
 <option value="th">🇹🇭 ไทย</option>
 <option value="en">🇺🇸 English</option>
 <option value="zh">🇨🇳 中文</option>
@@ -162,20 +120,29 @@ select{
 <option value="hi">🇮🇳 हिन्दी</option>
 </select>
 
+<select onchange="voiceGender=this.value">
+<option value="female">🎙 Female</option>
+<option value="male">🎙 Male</option>
+</select>
+
 <div class="message" id="message"></div>
 </header>
 
 <div class="card-group" id="cards"></div>
 
 <div class="admin-panel" id="adminPanel">
-<h2>📊 Statistics</h2>
+<h2>Statistics</h2>
 <table id="statsTable"></table>
 <button onclick="clearStats()">Clear Data</button>
 </div>
 
 <script>
 let currentLang="th";
+let voiceGender="female";
+let voices=[];
 let resetTimer=null;
+let audioUnlocked=false;
+const adminPassword="1234";
 
 const alertSound=new Audio("https://actions.google.com/sounds/v1/alarms/beep_short.ogg");
 const infoSound=new Audio("https://actions.google.com/sounds/v1/cartoon/wood_plank_flicks.ogg");
@@ -185,6 +152,40 @@ th:"th-TH", en:"en-US", zh:"zh-CN", ja:"ja-JP", ko:"ko-KR",
 es:"es-ES", fr:"fr-FR", de:"de-DE", ru:"ru-RU",
 ar:"ar-SA", hi:"hi-IN"
 };
+
+function loadVoices(){voices=speechSynthesis.getVoices()}
+speechSynthesis.onvoiceschanged=loadVoices;
+loadVoices();
+
+function unlockAudio(){
+if(!audioUnlocked){
+speechSynthesis.speak(new SpeechSynthesisUtterance(" "));
+audioUnlocked=true;
+}
+}
+
+function getVoice(){
+let list=voices.filter(v=>v.lang.startsWith(langMap[currentLang].split("-")[0]));
+if(list.length===0) return voices[0];
+if(voiceGender==="male"){
+return list.find(v=>v.name.toLowerCase().includes("male"))||list[0];
+}
+return list.find(v=>v.name.toLowerCase().includes("female"))||list[0];
+}
+
+function speak(text){
+unlockAudio();
+speechSynthesis.cancel();
+let utter=new SpeechSynthesisUtterance(text);
+utter.voice=getVoice();
+utter.lang=langMap[currentLang];
+utter.rate=.95;
+speechSynthesis.speak(utter);
+}
+
+function playSound(s){
+s.pause(); s.currentTime=0; s.play();
+}
 
 const translations={
 th:{title:"สิ่งของห้ามโหลดใต้ท้องเครื่อง",instruction:"กรุณาเลือกสิ่งของ",
@@ -217,25 +218,25 @@ warning:"❌ 위탁 금지",
 warningSpeak:"이 물품은 위탁 수하물로 보낼 수 없습니다.",
 ask:"⚠ 직원 문의",
 askSpeak:"직원에게 문의하세요."},
-es:{title:"Artículos Prohibidos",instruction:"Seleccione",
+es:{title:"Artículos Prohibidos",instruction:"Seleccione un artículo",
 items:["Power Bank","Batería","Cigarrillo electrónico","Portátil","Encendedor","Explosivos","Químico","Arma","Dudoso"],
 warning:"❌ Prohibido",
 warningSpeak:"No permitido en equipaje facturado.",
 ask:"⚠ Consulte al personal",
 askSpeak:"Consulte al personal."},
-fr:{title:"Objets Interdits",instruction:"Sélectionnez",
-items:["Batterie","Cigarette électronique","Ordinateur","Briquet","Explosifs","Produit chimique","Arme","Incertain"],
+fr:{title:"Objets Interdits",instruction:"Sélectionnez un objet",
+items:["Power Bank","Batterie","Cigarette électronique","Ordinateur","Briquet","Explosifs","Produit chimique","Arme","Incertain"],
 warning:"❌ Interdit",
 warningSpeak:"Objet interdit en soute.",
 ask:"⚠ Demandez au personnel",
 askSpeak:"Veuillez demander au personnel."},
-de:{title:"Verbotene Gegenstände",instruction:"Wählen Sie",
+de:{title:"Verbotene Gegenstände",instruction:"Artikel auswählen",
 items:["Powerbank","Batterie","E-Zigarette","Laptop","Feuerzeug","Explosivstoffe","Chemikalie","Waffe","Unsicher"],
 warning:"❌ Verboten",
 warningSpeak:"Nicht im Aufgabegepäck erlaubt.",
 ask:"⚠ Personal fragen",
 askSpeak:"Bitte fragen Sie das Personal."},
-ru:{title:"Запрещено",instruction:"Выберите предмет",
+ru:{title:"Запрещенные предметы",instruction:"Выберите предмет",
 items:["Пауэрбанк","Батарея","Эл. сигарета","Ноутбук","Зажигалка","Взрывчатка","Химикат","Оружие","Не уверен"],
 warning:"❌ Запрещено",
 warningSpeak:"Запрещено в зарегистрированном багаже.",
@@ -252,107 +253,109 @@ items:["पावर बैंक","बैटरी","ई-सिगरेट","�
 warning:"❌ प्रतिबंधित",
 warningSpeak:"चेक-इन बैगेज में अनुमति नहीं है।",
 ask:"⚠ स्टाफ से पूछें",
-askSpeak:"कृपया स्टाफ से पूछें。"}
+askSpeak:"कृपया स्टाफ से पूछें।"}
 };
 
-function speak(text){
-  speechSynthesis.cancel();
-  const utter=new SpeechSynthesisUtterance(text);
-  utter.lang=langMap[currentLang];
-  utter.rate=0.95;
-  speechSynthesis.speak(utter);
-}
-
 function renderCards(){
-  const container=document.getElementById("cards");
-  container.innerHTML="";
-  translations[currentLang].items.forEach((item,index)=>{
-    const card=document.createElement("div");
-    card.className="card";
-    card.innerHTML="<p>"+item+"</p>";
-    card.onclick=()=>selectItem(index);
-    container.appendChild(card);
-  });
+let container=document.getElementById("cards");
+container.innerHTML="";
+translations[currentLang].items.forEach((item,i)=>{
+let card=document.createElement("div");
+card.className="card";
+card.innerHTML="<p>"+item+"</p>";
+card.onclick=()=>selectItem(i);
+container.appendChild(card);
+});
 }
 
-function saveStat(index){
-  let stats=JSON.parse(localStorage.getItem("kioskStats")||"{}");
-  stats[index]=(stats[index]||0)+1;
-  localStorage.setItem("kioskStats",JSON.stringify(stats));
+function selectItem(i){
+saveStat(i);
+document.querySelectorAll(".card").forEach(c=>c.classList.remove("selected"));
+document.querySelectorAll(".card")[i].classList.add("selected");
+
+let data=translations[currentLang];
+let msg=document.getElementById("message");
+
+if(i===8){
+msg.innerText=data.ask;
+msg.classList.remove("alert");
+speak(data.askSpeak);
+playSound(infoSound);
+}else{
+msg.innerText=data.warning;
+msg.classList.add("alert");
+speak(data.warningSpeak);
+playSound(alertSound);
+}
+
+clearTimeout(resetTimer);
+resetTimer=setTimeout(resetAll,15000);
+}
+
+function saveStat(i){
+let stats=JSON.parse(localStorage.getItem("stats")||"{}");
+let key=currentLang+"_"+i;
+stats[key]=(stats[key]||0)+1;
+localStorage.setItem("stats",JSON.stringify(stats));
 }
 
 function renderStats(){
-  const table=document.getElementById("statsTable");
-  const stats=JSON.parse(localStorage.getItem("kioskStats")||"{}");
-  table.innerHTML="<tr><th>Item</th><th>Count</th></tr>";
-  Object.keys(stats).forEach(i=>{
-    table.innerHTML+="<tr><td>"+translations[currentLang].items[i]+"</td><td>"+stats[i]+"</td></tr>";
-  });
-}
-
-function selectItem(index){
-  saveStat(index);
-
-  document.querySelectorAll(".card").forEach(c=>c.classList.remove("selected"));
-  document.querySelectorAll(".card")[index].classList.add("selected");
-
-  const data=translations[currentLang];
-  const msg=document.getElementById("message");
-
-  if(index===8){
-    msg.innerText=data.ask;
-    msg.classList.remove("alert");
-    speak(data.askSpeak);
-    infoSound.play();
-  }else{
-    msg.innerText=data.warning;
-    msg.classList.add("alert");
-    speak(data.warningSpeak);
-    alertSound.play();
-  }
-
-  clearTimeout(resetTimer);
-  resetTimer=setTimeout(resetAll,15000);
-}
-
-function resetAll(){
-  document.querySelectorAll(".card").forEach(c=>c.classList.remove("selected"));
-  document.getElementById("message").innerText="";
-}
-
-function toggleMenu(){
-  const menu=document.getElementById("menuDropdown");
-  menu.style.display=menu.style.display==="block"?"none":"block";
-}
-
-document.addEventListener("click",function(e){
-  const menu=document.getElementById("menuDropdown");
-  const btn=document.querySelector(".menu-btn");
-  if(!btn.contains(e.target) && !menu.contains(e.target)){
-    menu.style.display="none";
-  }
+let table=document.getElementById("statsTable");
+let stats=JSON.parse(localStorage.getItem("stats")||"{}");
+table.innerHTML="<tr><th>Item</th><th>Count</th></tr>";
+Object.keys(stats).forEach(k=>{
+table.innerHTML+="<tr><td>"+k+"</td><td>"+stats[k]+"</td></tr>";
 });
-
-function toggleAdmin(){
-  const panel=document.getElementById("adminPanel");
-  panel.style.display=panel.style.display==="block"?"none":"block";
-  renderStats();
 }
 
 function clearStats(){
-  localStorage.removeItem("kioskStats");
-  renderStats();
+localStorage.removeItem("stats");
+renderStats();
 }
 
 function changeLang(lang){
-  currentLang=lang;
-  document.getElementById("title").innerText=translations[lang].title;
-  document.getElementById("instruction").innerText=translations[lang].instruction;
-  renderCards();
-  resetAll();
+currentLang=lang;
+document.getElementById("title").innerText=translations[lang].title;
+document.getElementById("instruction").innerText=translations[lang].instruction;
+renderCards();
+resetAll();
+setTimeout(()=>speak(translations[lang].instruction),300);
 }
 
-changeLang("th");
+function resetAll(){
+document.querySelectorAll(".card").forEach(c=>c.classList.remove("selected"));
+document.getElementById("message").innerText="";
+}
+
+function toggleMenu(){
+let m=document.getElementById("menu");
+m.style.display=m.style.display==="block"?"none":"block";
+}
+
+function toggleFullscreen(){
+document.documentElement.requestFullscreen();
+}
+
+function openAdmin(){
+let pass=prompt("Enter Admin Password:");
+if(pass===adminPassword){
+let panel=document.getElementById("adminPanel");
+panel.style.display=panel.style.display==="block"?"none":"block";
+renderStats();
+}else{
+alert("Wrong password");
+}
+}
+
+function autoDetectLang(){
+let browserLang=navigator.language.split("-")[0];
+if(translations[browserLang]){
+changeLang(browserLang);
+document.getElementById("langSelect").value=browserLang;
+}
+}
+
+autoDetectLang();
 </script>
 
 </body>
