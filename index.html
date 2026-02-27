@@ -1,111 +1,134 @@
 <!DOCTYPE html>
 <html lang="th">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>Smart Airport Kiosk 2.1</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Smart Airport Kiosk 4.0 PRO</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;600&family=Inter:wght@300;500;600&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
 <style>
-*{box-sizing:border-box}
+*{box-sizing:border-box;font-family:'Inter','Kanit',sans-serif}
 body{
-  margin:0;
-  font-family:Arial, sans-serif;
-  background:#0b1220;
-  color:#fff;
-  text-align:center;
+margin:0;
+background:linear-gradient(135deg,#0f172a,#1e293b);
+color:white;
+text-align:center;
+overflow-x:hidden;
 }
+
+/* TOP BAR */
+.language-bar{
+background:rgba(15,23,42,.95);
+padding:15px;
+display:flex;
+justify-content:center;
+gap:15px;
+position:sticky;
+top:0;
+z-index:20;
+box-shadow:0 5px 15px rgba(0,0,0,.4);
+}
+
+.language-bar select{
+padding:10px 15px;
+border-radius:12px;
+border:none;
+background:#1f2937;
+color:white;
+font-size:15px;
+cursor:pointer;
+}
+
+/* HEADER */
 header{
-  background:#111827;
-  padding:70px 20px 20px;
-  position:sticky;
-  top:0;
-  z-index:10;
+padding:30px 20px;
+position:relative;
 }
-.top-bar{
-  position:absolute;
-  top:15px;
-  right:20px;
+
+.logo{
+font-size:20px;
+font-weight:600;
+opacity:.8;
 }
-button,select{
-  padding:8px 12px;
-  border-radius:10px;
-  border:none;
-  margin:5px;
-  cursor:pointer;
+
+.clock{
+position:absolute;
+right:30px;
+top:30px;
+font-size:15px;
+opacity:.8;
 }
+
 .menu-btn{
-  font-size:26px;
-  background:none;
-  color:white;
+position:absolute;
+left:30px;
+top:30px;
+font-size:20px;
+background:none;
+border:none;
+color:white;
+cursor:pointer;
 }
-.dropdown{
-  display:none;
-  position:absolute;
-  right:0;
-  top:45px;
-  background:#1f2937;
-  border-radius:12px;
-  padding:10px;
-  min-width:200px;
-}
-.dropdown button{
-  width:100%;
-  background:none;
-  color:white;
-  text-align:left;
-}
-.dropdown button:hover{background:#374151}
 
+h1{font-size:30px;margin:10px 0}
+#instruction{opacity:.8;margin-bottom:20px}
+.message{font-size:22px;min-height:40px;font-weight:500}
+
+.alert{
+color:#ff4d4d;
+animation:blink .6s infinite alternate;
+}
+@keyframes blink{from{opacity:1}to{opacity:.4}}
+
+/* CARD GRID */
 .card-group{
-  display:grid;
-  grid-template-columns:repeat(auto-fit,minmax(200px,1fr));
-  gap:25px;
-  padding:30px;
+display:grid;
+grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
+gap:25px;
+padding:30px;
 }
+
 .card{
-  background:#1f2937;
-  border-radius:20px;
-  height:220px;
-  display:flex;
-  justify-content:center;
-  align-items:center;
-  cursor:pointer;
-  transition:.3s;
-  font-size:18px;
+background:rgba(31,41,55,.9);
+border-radius:25px;
+height:220px;
+display:flex;
+justify-content:center;
+align-items:center;
+cursor:pointer;
+transition:.3s;
+font-size:18px;
+box-shadow:0 10px 25px rgba(0,0,0,.4);
 }
-.card:hover{transform:scale(1.05)}
-.card.selected{background:#b91c1c}
 
-.message{font-size:22px;min-height:50px;margin-top:10px}
-.alert{color:#ff3b3b;animation:blink .6s infinite alternate}
-@keyframes blink{from{opacity:1}to{opacity:.5}}
+.card:hover{transform:translateY(-5px);background:#374151}
+.card.selected{
+background:#dc2626;
+box-shadow:0 0 30px rgba(220,38,38,.6);
+}
 
+/* ADMIN */
 .admin-panel{
-  display:none;
-  background:#1f2937;
-  margin:20px;
-  padding:20px;
-  border-radius:15px;
+display:none;
+background:#1f2937;
+margin:30px;
+padding:30px;
+border-radius:20px;
 }
-table{width:100%;border-collapse:collapse}
-td,th{border:1px solid #374151;padding:8px}
+button{
+padding:8px 14px;
+border:none;
+border-radius:10px;
+cursor:pointer;
+}
 </style>
 </head>
+
 <body>
 
-<header>
-<div class="top-bar">
-<button class="menu-btn" onclick="toggleMenu()">☰</button>
-<div class="dropdown" id="menu">
-<button onclick="openAdmin()">📊 Admin</button>
-<button onclick="toggleFullscreen()">🖥 Fullscreen</button>
-<button onclick="resetAll()">🔄 Reset</button>
-</div>
-</div>
-
-<h1 id="title"></h1>
-<div id="instruction"></div>
-
+<div class="language-bar">
 <select onchange="changeLang(this.value)" id="langSelect">
 <option value="th">🇹🇭 ไทย</option>
 <option value="en">🇺🇸 English</option>
@@ -119,143 +142,110 @@ td,th{border:1px solid #374151;padding:8px}
 <option value="ar">🇸🇦 العربية</option>
 <option value="hi">🇮🇳 हिन्दी</option>
 </select>
+</div>
 
-<select onchange="voiceGender=this.value">
-<option value="female">🎙 Female</option>
-<option value="male">🎙 Male</option>
-</select>
-
+<header>
+<button class="menu-btn" onclick="openAdmin()">📊</button>
+<div class="logo">✈ SMART AIRPORT SYSTEM</div>
+<div class="clock" id="clock"></div>
+<h1 id="title"></h1>
+<div id="instruction"></div>
 <div class="message" id="message"></div>
 </header>
 
 <div class="card-group" id="cards"></div>
 
 <div class="admin-panel" id="adminPanel">
-<h2>Statistics</h2>
-<table id="statsTable"></table>
+<h2>Usage Statistics</h2>
+<canvas id="chart"></canvas>
+<br><br>
 <button onclick="clearStats()">Clear Data</button>
 </div>
 
 <script>
-let currentLang="th";
-let voiceGender="female";
-let voices=[];
-let resetTimer=null;
-let audioUnlocked=false;
-const adminPassword="1234";
 
-const alertSound=new Audio("https://actions.google.com/sounds/v1/alarms/beep_short.ogg");
+/* CLOCK */
+setInterval(()=>{
+document.getElementById("clock").innerText=
+new Date().toLocaleTimeString();
+},1000);
+
+/* SOUND */
+const alertSound=new Audio("https://actions.google.com/sounds/v1/alarms/alarm_clock.ogg");
 const infoSound=new Audio("https://actions.google.com/sounds/v1/cartoon/wood_plank_flicks.ogg");
 
-const langMap={
-th:"th-TH", en:"en-US", zh:"zh-CN", ja:"ja-JP", ko:"ko-KR",
-es:"es-ES", fr:"fr-FR", de:"de-DE", ru:"ru-RU",
-ar:"ar-SA", hi:"hi-IN"
-};
+/* SPEECH ENGINE */
+let voices=[];
+let currentLang="th";
+let speechUnlocked=false;
 
-function loadVoices(){voices=speechSynthesis.getVoices()}
+function loadVoices(){
+voices=speechSynthesis.getVoices();
+}
 speechSynthesis.onvoiceschanged=loadVoices;
 loadVoices();
 
-function unlockAudio(){
-if(!audioUnlocked){
+function unlockSpeech(){
+if(!speechUnlocked){
 speechSynthesis.speak(new SpeechSynthesisUtterance(" "));
-audioUnlocked=true;
+speechUnlocked=true;
 }
-}
-
-function getVoice(){
-let list=voices.filter(v=>v.lang.startsWith(langMap[currentLang].split("-")[0]));
-if(list.length===0) return voices[0];
-if(voiceGender==="male"){
-return list.find(v=>v.name.toLowerCase().includes("male"))||list[0];
-}
-return list.find(v=>v.name.toLowerCase().includes("female"))||list[0];
 }
 
 function speak(text){
-unlockAudio();
+unlockSpeech();
 speechSynthesis.cancel();
 let utter=new SpeechSynthesisUtterance(text);
-utter.voice=getVoice();
 utter.lang=langMap[currentLang];
-utter.rate=.95;
+let match=voices.find(v=>v.lang.startsWith(langMap[currentLang].split("-")[0]));
+if(match) utter.voice=match;
+utter.rate=0.95;
 speechSynthesis.speak(utter);
 }
 
-function playSound(s){
-s.pause(); s.currentTime=0; s.play();
-}
+const langMap={
+th:"th-TH",en:"en-US",zh:"zh-CN",ja:"ja-JP",ko:"ko-KR",
+es:"es-ES",fr:"fr-FR",de:"de-DE",ru:"ru-RU",ar:"ar-SA",hi:"hi-IN"
+};
 
+/* TRANSLATIONS 11 LANG */
 const translations={
 th:{title:"สิ่งของห้ามโหลดใต้ท้องเครื่อง",instruction:"กรุณาเลือกสิ่งของ",
 items:["พาวเวอร์แบงค์","แบตเตอรี่","บุหรี่ไฟฟ้า","โน้ตบุ๊ก","ไฟแช็ก","วัตถุระเบิด","สารเคมี","อาวุธ","ไม่แน่ใจ"],
-warning:"❌ ห้ามโหลดใต้เครื่อง",
-warningSpeak:"ไม่สามารถโหลดใต้ท้องเครื่องได้ กรุณาถือขึ้นเครื่อง",
-ask:"⚠ โปรดสอบถามเจ้าหน้าที่",
-askSpeak:"กรุณาสอบถามเจ้าหน้าที่"},
+warning:"ห้ามโหลดใต้ท้องเครื่อง กรุณาถือขึ้นเครื่อง",ask:"กรุณาสอบถามเจ้าหน้าที่"},
 en:{title:"Prohibited Items",instruction:"Select an item",
 items:["Power Bank","Battery","E-Cigarette","Laptop","Lighter","Explosives","Chemical","Weapon","Unsure Item"],
-warning:"❌ Prohibited",
-warningSpeak:"This item is not permitted in checked baggage.",
-ask:"⚠ Ask staff",
-askSpeak:"Please ask airport staff."},
+warning:"Not permitted in checked baggage",ask:"Please ask airport staff"},
 zh:{title:"禁止物品",instruction:"请选择物品",
 items:["充电宝","电池","电子烟","笔记本","打火机","爆炸物","化学品","武器","不确定"],
-warning:"❌ 禁止托运",
-warningSpeak:"此物品禁止托运。",
-ask:"⚠ 请咨询工作人员",
-askSpeak:"请咨询工作人员。"},
+warning:"禁止托运",ask:"请咨询工作人员"},
 ja:{title:"禁止品",instruction:"物品を選択",
 items:["モバイルバッテリー","電池","電子タバコ","ノートPC","ライター","爆発物","化学物質","武器","不明"],
-warning:"❌ 受託不可",
-warningSpeak:"この物品は預けられません。",
-ask:"⚠ スタッフ確認",
-askSpeak:"スタッフにお問い合わせください。"},
+warning:"受託不可",ask:"スタッフに確認してください"},
 ko:{title:"금지 품목",instruction:"물품 선택",
 items:["보조배터리","배터리","전자담배","노트북","라이터","폭발물","화학물질","무기","불확실"],
-warning:"❌ 위탁 금지",
-warningSpeak:"이 물품은 위탁 수하물로 보낼 수 없습니다.",
-ask:"⚠ 직원 문의",
-askSpeak:"직원에게 문의하세요."},
+warning:"위탁 수하물 금지",ask:"직원에게 문의하세요"},
 es:{title:"Artículos Prohibidos",instruction:"Seleccione un artículo",
 items:["Power Bank","Batería","Cigarrillo electrónico","Portátil","Encendedor","Explosivos","Químico","Arma","Dudoso"],
-warning:"❌ Prohibido",
-warningSpeak:"No permitido en equipaje facturado.",
-ask:"⚠ Consulte al personal",
-askSpeak:"Consulte al personal."},
+warning:"No permitido en equipaje facturado",ask:"Consulte al personal"},
 fr:{title:"Objets Interdits",instruction:"Sélectionnez un objet",
 items:["Power Bank","Batterie","Cigarette électronique","Ordinateur","Briquet","Explosifs","Produit chimique","Arme","Incertain"],
-warning:"❌ Interdit",
-warningSpeak:"Objet interdit en soute.",
-ask:"⚠ Demandez au personnel",
-askSpeak:"Veuillez demander au personnel."},
+warning:"Interdit en soute",ask:"Demandez au personnel"},
 de:{title:"Verbotene Gegenstände",instruction:"Artikel auswählen",
 items:["Powerbank","Batterie","E-Zigarette","Laptop","Feuerzeug","Explosivstoffe","Chemikalie","Waffe","Unsicher"],
-warning:"❌ Verboten",
-warningSpeak:"Nicht im Aufgabegepäck erlaubt.",
-ask:"⚠ Personal fragen",
-askSpeak:"Bitte fragen Sie das Personal."},
+warning:"Nicht im Aufgabegepäck erlaubt",ask:"Personal fragen"},
 ru:{title:"Запрещенные предметы",instruction:"Выберите предмет",
 items:["Пауэрбанк","Батарея","Эл. сигарета","Ноутбук","Зажигалка","Взрывчатка","Химикат","Оружие","Не уверен"],
-warning:"❌ Запрещено",
-warningSpeak:"Запрещено в зарегистрированном багаже.",
-ask:"⚠ Спросите сотрудника",
-askSpeak:"Обратитесь к сотруднику."},
+warning:"Запрещено в багаже",ask:"Обратитесь к сотруднику"},
 ar:{title:"مواد محظورة",instruction:"اختر العنصر",
 items:["باور بنك","بطارية","سيجارة إلكترونية","كمبيوتر","ولاعة","متفجرات","مواد كيميائية","سلاح","غير مؤكد"],
-warning:"❌ ممنوع",
-warningSpeak:"غير مسموح في الأمتعة المسجلة.",
-ask:"⚠ اسأل الموظف",
-askSpeak:"يرجى سؤال الموظف."},
+warning:"ممنوع في الأمتعة المسجلة",ask:"يرجى سؤال الموظف"},
 hi:{title:"प्रतिबंधित वस्तुएँ",instruction:"वस्तु चुनें",
 items:["पावर बैंक","बैटरी","ई-सिगरेट","लैपटॉप","लाइटर","विस्फोटक","रसायन","हथियार","अनिश्चित"],
-warning:"❌ प्रतिबंधित",
-warningSpeak:"चेक-इन बैगेज में अनुमति नहीं है।",
-ask:"⚠ स्टाफ से पूछें",
-askSpeak:"कृपया स्टाफ से पूछें।"}
+warning:"चेक-इन बैगेज में अनुमति नहीं",ask:"कृपया स्टाफ से पूछें"}
 };
 
+/* RENDER */
 function renderCards(){
 let container=document.getElementById("cards");
 container.innerHTML="";
@@ -279,38 +269,16 @@ let msg=document.getElementById("message");
 if(i===8){
 msg.innerText=data.ask;
 msg.classList.remove("alert");
-speak(data.askSpeak);
-playSound(infoSound);
+infoSound.play();
+speak(data.ask);
 }else{
 msg.innerText=data.warning;
 msg.classList.add("alert");
-speak(data.warningSpeak);
-playSound(alertSound);
+alertSound.play();
+speak(data.warning);
 }
 
-clearTimeout(resetTimer);
-resetTimer=setTimeout(resetAll,15000);
-}
-
-function saveStat(i){
-let stats=JSON.parse(localStorage.getItem("stats")||"{}");
-let key=currentLang+"_"+i;
-stats[key]=(stats[key]||0)+1;
-localStorage.setItem("stats",JSON.stringify(stats));
-}
-
-function renderStats(){
-let table=document.getElementById("statsTable");
-let stats=JSON.parse(localStorage.getItem("stats")||"{}");
-table.innerHTML="<tr><th>Item</th><th>Count</th></tr>";
-Object.keys(stats).forEach(k=>{
-table.innerHTML+="<tr><td>"+k+"</td><td>"+stats[k]+"</td></tr>";
-});
-}
-
-function clearStats(){
-localStorage.removeItem("stats");
-renderStats();
+setTimeout(resetAll,15000);
 }
 
 function changeLang(lang){
@@ -319,7 +287,39 @@ document.getElementById("title").innerText=translations[lang].title;
 document.getElementById("instruction").innerText=translations[lang].instruction;
 renderCards();
 resetAll();
-setTimeout(()=>speak(translations[lang].instruction),300);
+}
+
+let chart;
+function saveStat(i){
+let stats=JSON.parse(localStorage.getItem("stats")||"{}");
+stats[i]=(stats[i]||0)+1;
+localStorage.setItem("stats",JSON.stringify(stats));
+}
+
+function renderChart(){
+let stats=JSON.parse(localStorage.getItem("stats")||"{}");
+let labels=translations[currentLang].items;
+let data=labels.map((_,i)=>stats[i]||0);
+
+if(chart) chart.destroy();
+chart=new Chart(document.getElementById("chart"),{
+type:"bar",
+data:{labels:labels,datasets:[{label:"Usage",data:data,backgroundColor:"#3b82f6"}]}
+});
+}
+
+function clearStats(){
+localStorage.removeItem("stats");
+renderChart();
+}
+
+function openAdmin(){
+let pass=prompt("Enter Admin Password:");
+if(pass==="1234"){
+let panel=document.getElementById("adminPanel");
+panel.style.display=panel.style.display==="block"?"none":"block";
+renderChart();
+}
 }
 
 function resetAll(){
@@ -327,35 +327,7 @@ document.querySelectorAll(".card").forEach(c=>c.classList.remove("selected"));
 document.getElementById("message").innerText="";
 }
 
-function toggleMenu(){
-let m=document.getElementById("menu");
-m.style.display=m.style.display==="block"?"none":"block";
-}
-
-function toggleFullscreen(){
-document.documentElement.requestFullscreen();
-}
-
-function openAdmin(){
-let pass=prompt("Enter Admin Password:");
-if(pass===adminPassword){
-let panel=document.getElementById("adminPanel");
-panel.style.display=panel.style.display==="block"?"none":"block";
-renderStats();
-}else{
-alert("Wrong password");
-}
-}
-
-function autoDetectLang(){
-let browserLang=navigator.language.split("-")[0];
-if(translations[browserLang]){
-changeLang(browserLang);
-document.getElementById("langSelect").value=browserLang;
-}
-}
-
-autoDetectLang();
+changeLang("th");
 </script>
 
 </body>
