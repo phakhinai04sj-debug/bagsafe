@@ -1,270 +1,317 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="th">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Professional Airport Kiosk</title>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Airport Smart Baggage Kiosk - Production</title>
 
 <style>
+*{box-sizing:border-box}
 body{
   margin:0;
   font-family:Arial, sans-serif;
-  background:#0b1c2d;
-  color:white;
-  display:flex;
-  justify-content:center;
-  align-items:center;
-  height:100vh;
-}
-
-.kiosk{
-  width:95%;
-  max-width:900px;
-  background:#12263a;
-  padding:25px;
-  border-radius:20px;
+  background:#0b1220;
+  color:#fff;
   text-align:center;
-  box-shadow:0 0 30px rgba(0,0,0,0.5);
 }
 
-h1{
-  margin-bottom:15px;
+header{
+  background:#111827;
+  padding:70px 20px 20px 20px;
+  position:sticky;
+  top:0;
+  z-index:10;
+}
+
+.top-bar{
+  position:absolute;
+  top:15px;
+  right:20px;
+}
+
+.menu-btn{
+  font-size:28px;
+  background:none;
+  border:none;
+  color:white;
+  cursor:pointer;
+}
+
+.dropdown{
+  display:none;
+  position:absolute;
+  right:0;
+  top:45px;
+  background:#1f2937;
+  border-radius:12px;
+  padding:10px;
+  min-width:190px;
+  box-shadow:0 5px 20px rgba(0,0,0,0.6);
+}
+
+.dropdown button{
+  width:100%;
+  background:none;
+  border:none;
+  color:white;
+  padding:10px;
+  text-align:left;
+  cursor:pointer;
+  border-radius:8px;
+}
+
+.dropdown button:hover{
+  background:#374151;
+}
+
+h1{margin:5px 0;color:#ff2d2d}
+.instructions{margin:8px 0;font-size:18px}
+
+select{
+  padding:8px 12px;
+  border-radius:10px;
+  border:none;
+  margin:5px;
 }
 
 .message{
-  font-size:1.4rem;
-  margin:20px 0;
-  min-height:60px;
+  margin-top:15px;
+  font-weight:bold;
+  min-height:50px;
+  font-size:20px;
 }
 
-.grid{
+.message.alert{
+  color:#ff3b3b;
+  animation:blink 0.6s infinite alternate;
+}
+
+@keyframes blink{
+  from{opacity:1}
+  to{opacity:0.5}
+}
+
+.card-group{
   display:grid;
-  grid-template-columns:repeat(3,1fr);
-  gap:15px;
-  margin-top:15px;
+  grid-template-columns:repeat(auto-fit,minmax(200px,1fr));
+  gap:25px;
+  padding:30px;
 }
 
 .card{
-  background:#1f3b5c;
-  padding:20px;
-  border-radius:15px;
+  background:#1f2937;
+  border-radius:20px;
+  height:220px;
+  display:flex;
+  flex-direction:column;
+  justify-content:center;
+  align-items:center;
   cursor:pointer;
   transition:0.3s;
+  font-size:18px;
 }
 
-.card:hover{
-  background:#2b5a8c;
-}
+.card:hover{transform:scale(1.05)}
+.card.selected{background:#b91c1c}
 
-.card.selected{
-  background:#3fa9f5;
-}
-
-.lang-btn{
-  margin-top:20px;
-  font-size:2.2rem;
-  background:#1f3b5c;
-  border:none;
-  border-radius:50%;
-  width:70px;
-  height:70px;
-  color:white;
-  cursor:pointer;
-}
-
-.lang-panel{
+.admin-panel{
   display:none;
-  margin-top:10px;
+  background:#1f2937;
+  margin:20px;
+  padding:20px;
+  border-radius:15px;
 }
 
-.lang-panel button{
-  margin:5px;
-  padding:8px 12px;
-  border-radius:8px;
-  border:none;
-  cursor:pointer;
+.admin-panel table{
+  width:100%;
+  border-collapse:collapse;
 }
 
-.footer{
-  margin-top:20px;
-  font-size:0.85rem;
-  opacity:0.7;
+.admin-panel th,.admin-panel td{
+  border:1px solid #374151;
+  padding:8px;
 }
 </style>
 </head>
-
 <body>
 
-<div class="kiosk">
+<header>
 
-<h1 id="title">Airport Information</h1>
+<div class="top-bar">
+  <button class="menu-btn" onclick="toggleMenu()">☰</button>
+  <div class="dropdown" id="menuDropdown">
+    <button onclick="toggleAdmin()">📊 Admin Panel</button>
+    <button onclick="document.documentElement.requestFullscreen()">🖥 Full Screen</button>
+    <button onclick="resetAll()">🔄 Reset</button>
+  </div>
+</div>
 
-<div id="instruction">Please select a service</div>
+<h1 id="title"></h1>
+<div class="instructions" id="instruction"></div>
 
-<div class="grid" id="cards"></div>
+<select onchange="changeLang(this.value)">
+<option value="th">🇹🇭 ไทย</option>
+<option value="en">🇺🇸 English</option>
+<option value="zh">🇨🇳 中文</option>
+<option value="ja">🇯🇵 日本語</option>
+<option value="ko">🇰🇷 한국어</option>
+<option value="es">🇪🇸 Español</option>
+<option value="fr">🇫🇷 Français</option>
+<option value="de">🇩🇪 Deutsch</option>
+<option value="ru">🇷🇺 Русский</option>
+<option value="ar">🇸🇦 العربية</option>
+<option value="hi">🇮🇳 हिन्दी</option>
+</select>
 
-<div id="message" class="message"></div>
+<div class="message" id="message"></div>
+</header>
 
-<button class="lang-btn" onclick="toggleLang()">🌐</button>
+<div class="card-group" id="cards"></div>
 
-<div id="langPanel" class="lang-panel"></div>
-
-<div class="footer">11 Languages • Automatic Voice • Professional Mode</div>
-
+<div class="admin-panel" id="adminPanel">
+<h2>📊 Statistics</h2>
+<table id="statsTable"></table>
+<button onclick="clearStats()">Clear Data</button>
 </div>
 
 <script>
-const translations={
-th:{
- title:"ตู้ข้อมูลสนามบิน",
- instruction:"กรุณาเลือกบริการ",
- services:["จุดตรวจสัมภาระ","สิ่งของต้องห้าม","ข้อมูลเที่ยวบิน","แผนที่สนามบิน","เคาน์เตอร์เช็คอิน","ร้านค้า","ประตูขึ้นเครื่อง","ห้องรับรอง","ติดต่อเจ้าหน้าที่"],
- messages:[
-   "กรุณาตรวจสอบสัมภาระก่อนเข้าจุดตรวจ",
-   "ห้ามนำของมีคมและวัตถุอันตรายขึ้นเครื่อง",
-   "กรุณาตรวจสอบหมายเลขเที่ยวบินของท่าน",
-   "นี่คือแผนที่สนามบิน",
-   "กรุณาติดต่อเคาน์เตอร์เช็คอิน",
-   "นี่คือโซนร้านค้า",
-   "กรุณาตรวจสอบประตูขึ้นเครื่อง",
-   "นี่คือห้องรับรองผู้โดยสาร",
-   "เจ้าหน้าที่กำลังให้บริการ"
- ]
-},
-en:{
- title:"Airport Information Kiosk",
- instruction:"Please select a service",
- services:["Baggage Check","Prohibited Items","Flight Info","Airport Map","Check-in Counter","Shops","Boarding Gate","Lounge","Contact Staff"],
- messages:[
-   "Please check your baggage before security screening.",
-   "Sharp objects and hazardous items are prohibited.",
-   "Please verify your flight number.",
-   "Here is the airport map.",
-   "Please proceed to the check-in counter.",
-   "Here is the shopping area.",
-   "Please verify your boarding gate.",
-   "Here is the passenger lounge.",
-   "Our staff is ready to assist you."
- ]
-},
-zh:{
- title:"机场信息终端",
- instruction:"请选择服务",
- services:["行李检查","违禁物品","航班信息","机场地图","值机柜台","商店","登机口","休息室","联系工作人员"],
- messages:[
-   "请在安检前检查您的行李。",
-   "禁止携带尖锐或危险物品。",
-   "请确认您的航班号。",
-   "这是机场地图。",
-   "请前往值机柜台。",
-   "这是购物区。",
-   "请确认您的登机口。",
-   "这是贵宾休息室。",
-   "工作人员将为您服务。"
- ]
-},
-ja:{
- title:"空港案内端末",
- instruction:"サービスを選択してください",
- services:["手荷物検査","禁止品目","フライト情報","空港マップ","チェックイン","ショップ","搭乗口","ラウンジ","スタッフ連絡"],
- messages:[
-   "保安検査前にお荷物をご確認ください。",
-   "危険物や鋭利な物は禁止されています。",
-   "フライト番号をご確認ください。",
-   "こちらは空港マップです。",
-   "チェックインカウンターへお進みください。",
-   "こちらはショップエリアです。",
-   "搭乗口をご確認ください。",
-   "こちらはラウンジです。",
-   "スタッフが対応いたします。"
- ]
-}
-};
-
-// ===== add remaining languages automatically cloning EN structure for brevity =====
-["ko","fr","de","es","ru","ar","hi"].forEach(l=>{
- translations[l]=translations.en;
-});
-
-// voice language mapping
-const voiceLang={
- th:"th-TH", en:"en-US", zh:"zh-CN", ja:"ja-JP",
- ko:"ko-KR", fr:"fr-FR", de:"de-DE",
- es:"es-ES", ru:"ru-RU", ar:"ar-SA", hi:"hi-IN"
-};
-
-let currentLang=localStorage.getItem("kioskLang")||"en";
-let selectedIndex=localStorage.getItem("selectedIndex");
+let currentLang="th";
+let resetTimer=null;
 let voices=[];
+let audioUnlocked=false;
+
+const alertSound=new Audio("https://actions.google.com/sounds/v1/alarms/beep_short.ogg");
+const infoSound=new Audio("https://actions.google.com/sounds/v1/cartoon/wood_plank_flicks.ogg");
+
+const langMap={
+th:"th-TH", en:"en-US", zh:"zh-CN", ja:"ja-JP", ko:"ko-KR",
+es:"es-ES", fr:"fr-FR", de:"de-DE", ru:"ru-RU",
+ar:"ar-SA", hi:"hi-IN"
+};
 
 function loadVoices(){ voices=speechSynthesis.getVoices(); }
 speechSynthesis.onvoiceschanged=loadVoices;
+loadVoices();
+
+function unlockAudio(){
+  if(!audioUnlocked){
+    speechSynthesis.speak(new SpeechSynthesisUtterance(" "));
+    audioUnlocked=true;
+  }
+}
+
+function getVoiceByLang(langCode){
+  const lang=langMap[langCode];
+  let matched=voices.find(v=>v.lang===lang);
+  if(!matched){
+    matched=voices.find(v=>v.lang.startsWith(lang.split("-")[0]));
+  }
+  if(!matched && voices.length>0){
+    matched=voices[0];
+  }
+  return matched;
+}
 
 function speak(text){
- speechSynthesis.cancel();
- const utter=new SpeechSynthesisUtterance(text);
- utter.lang=voiceLang[currentLang];
- utter.rate=0.9;
- utter.pitch=1;
- const v=voices.find(v=>v.lang===utter.lang);
- if(v) utter.voice=v;
- speechSynthesis.speak(utter);
+  if(!text) return;
+  unlockAudio();
+  speechSynthesis.cancel();
+
+  const utter=new SpeechSynthesisUtterance(text);
+  utter.voice=getVoiceByLang(currentLang);
+  utter.lang=langMap[currentLang];
+  utter.rate=0.95;
+  utter.pitch=1;
+  utter.volume=1;
+
+  speechSynthesis.speak(utter);
 }
 
-function render(){
- const data=translations[currentLang];
- document.getElementById("title").innerText=data.title;
- document.getElementById("instruction").innerText=data.instruction;
-
- const grid=document.getElementById("cards");
- grid.innerHTML="";
-
- data.services.forEach((s,i)=>{
-   const div=document.createElement("div");
-   div.className="card";
-   div.innerText=s;
-   div.onclick=()=>selectService(i);
-   if(i==selectedIndex) div.classList.add("selected");
-   grid.appendChild(div);
- });
+function playSound(sound){
+  sound.pause();
+  sound.currentTime=0;
+  sound.play();
 }
 
-function selectService(i){
- selectedIndex=i;
- localStorage.setItem("selectedIndex",i);
- render();
- const msg=translations[currentLang].messages[i];
- document.getElementById("message").innerText=msg;
- speak(msg);
+const translations={
+th:{title:"สิ่งของห้ามโหลดใต้ท้องเครื่อง",instruction:"กรุณาเลือกสิ่งของ",
+items:["พาวเวอร์แบงค์","แบตเตอรี่","บุหรี่ไฟฟ้า","โน้ตบุ๊ก","ไฟแช็ก","วัตถุระเบิด","สารเคมี","อาวุธ","ไม่แน่ใจ"],
+warning:"❌ ห้ามโหลดใต้เครื่อง",
+warningSpeak:"ไม่สามารถโหลดใต้ท้องเครื่องได้ กรุณาถือขึ้นเครื่อง",
+ask:"⚠ โปรดสอบถามเจ้าหน้าที่",
+askSpeak:"กรุณาสอบถามเจ้าหน้าที่"},
+en:{title:"Prohibited Items",instruction:"Select an item",
+items:["Power Bank","Battery","E-Cigarette","Laptop","Lighter","Explosives","Chemical","Weapon","Unsure Item"],
+warning:"❌ Prohibited",
+warningSpeak:"This item is not permitted in checked baggage.",
+ask:"⚠ Ask staff",
+askSpeak:"Please ask airport staff."}
+};
+
+function renderCards(){
+  const container=document.getElementById("cards");
+  container.innerHTML="";
+  translations[currentLang].items.forEach((item,index)=>{
+    const card=document.createElement("div");
+    card.className="card";
+    card.innerHTML="<p>"+item+"</p>";
+    card.onclick=()=>selectItem(index);
+    container.appendChild(card);
+  });
 }
 
-function changeLang(l){
- currentLang=l;
- localStorage.setItem("kioskLang",l);
- render();
- if(selectedIndex!==null){
-   selectService(selectedIndex);
- }
- toggleLang();
+function selectItem(index){
+  document.querySelectorAll(".card").forEach(c=>c.classList.remove("selected"));
+  document.querySelectorAll(".card")[index].classList.add("selected");
+
+  const data=translations[currentLang];
+  const msg=document.getElementById("message");
+
+  if(index===8){
+    msg.innerText=data.ask;
+    msg.classList.remove("alert");
+    speak(data.askSpeak);
+    playSound(infoSound);
+  }else{
+    msg.innerText=data.warning;
+    msg.classList.add("alert");
+    speak(data.warningSpeak);
+    playSound(alertSound);
+  }
+
+  clearTimeout(resetTimer);
+  resetTimer=setTimeout(resetAll,15000);
 }
 
-function toggleLang(){
- const p=document.getElementById("langPanel");
- p.style.display=p.style.display==="block"?"none":"block";
+function resetAll(){
+  document.querySelectorAll(".card").forEach(c=>c.classList.remove("selected"));
+  document.getElementById("message").innerText="";
 }
 
-function buildLangPanel(){
- const panel=document.getElementById("langPanel");
- Object.keys(translations).forEach(l=>{
-   const b=document.createElement("button");
-   b.innerText=l.toUpperCase();
-   b.onclick=()=>changeLang(l);
-   panel.appendChild(b);
- });
+function toggleMenu(){
+  const menu=document.getElementById("menuDropdown");
+  menu.style.display=menu.style.display==="block"?"none":"block";
 }
 
-buildLangPanel();
-render();
+function toggleAdmin(){
+  const panel=document.getElementById("adminPanel");
+  panel.style.display=panel.style.display==="block"?"none":"block";
+}
+
+function clearStats(){
+  localStorage.removeItem("kioskStats");
+}
+
+function changeLang(lang){
+  currentLang=lang;
+  document.getElementById("title").innerText=translations[lang].title;
+  document.getElementById("instruction").innerText=translations[lang].instruction;
+  renderCards();
+  resetAll();
+  setTimeout(()=>{ speak(translations[lang].instruction); },300);
+}
+
+changeLang("th");
 </script>
 
 </body>
