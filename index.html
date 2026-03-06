@@ -4,16 +4,15 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>Smart Airport Kiosk 4.0</title>
+<title>Smart Airport Kiosk 4.0 PRO</title>
 
-<link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;600&display=swap" rel="stylesheet">
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;600&family=Inter:wght@300;500;600&display=swap" rel="stylesheet">
 
 <style>
 
 *{
 box-sizing:border-box;
-font-family:'Kanit',sans-serif;
+font-family:'Inter','Kanit',sans-serif;
 }
 
 body{
@@ -25,94 +24,43 @@ text-align:center;
 
 /* TOP BAR */
 
-.language-bar{
-background:#0f172a;
-padding:12px 20px;
+.topbar{
 display:flex;
 align-items:center;
 justify-content:space-between;
-position:sticky;
-top:0;
-z-index:100;
-box-shadow:0 4px 15px rgba(0,0,0,.4);
+padding:12px 20px;
+background:#0f172a;
+box-shadow:0 4px 10px rgba(0,0,0,.4);
 }
 
-.left,.right{
-display:flex;
-align-items:center;
-gap:15px;
-}
-
-.center{
-position:absolute;
-left:50%;
-transform:translateX(-50%);
-}
-
-.menu-btn{
-font-size:26px;
-background:none;
-border:none;
-color:white;
+.center-menu{
+font-size:28px;
 cursor:pointer;
 }
-
-/* MENU */
-
-.menu{
-display:none;
-position:absolute;
-top:55px;
-left:20px;
-background:#1f2937;
-border-radius:10px;
-padding:10px;
-box-shadow:0 10px 25px rgba(0,0,0,.5);
-}
-
-.menu button{
-display:block;
-width:170px;
-margin:5px 0;
-padding:10px;
-border:none;
-border-radius:8px;
-background:#374151;
-color:white;
-cursor:pointer;
-}
-
-/* LANGUAGE */
-
-.language-bar select{
-padding:8px 14px;
-border-radius:10px;
-border:none;
-background:#1f2937;
-color:white;
-}
-
-/* CLOCK */
 
 .clock{
 font-size:14px;
 opacity:.8;
 }
 
+.language-select{
+padding:8px 12px;
+border-radius:10px;
+border:none;
+background:#1f2937;
+color:white;
+font-size:14px;
+}
+
 /* HEADER */
 
 header{
-padding:40px 20px;
-}
-
-.logo{
-opacity:.7;
-margin-bottom:10px;
+padding:30px 20px;
 }
 
 h1{
 font-size:28px;
-margin:10px 0;
+margin-bottom:5px;
 }
 
 #instruction{
@@ -123,55 +71,47 @@ margin-bottom:20px;
 .message{
 font-size:22px;
 min-height:50px;
-font-weight:500;
 }
 
-/* CARDS */
+/* GRID */
 
-.card-group{
+.grid{
 display:grid;
-grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
+grid-template-columns:repeat(auto-fit,minmax(200px,1fr));
 gap:25px;
 padding:30px;
-max-width:1200px;
+max-width:1100px;
 margin:auto;
 }
 
 .card{
-border-radius:25px;
-height:210px;
-display:flex;
-flex-direction:column;
-align-items:center;
-justify-content:center;
-cursor:pointer;
-font-size:18px;
+background:#1f2937;
+border-radius:20px;
 padding:20px;
+cursor:pointer;
 transition:.3s;
+box-shadow:0 8px 20px rgba(0,0,0,.4);
 }
-
-.card img{
-width:60px;
-margin-bottom:10px;
-}
-
-.red{background:#dc2626;}
-.green{background:#16a34a;}
-.yellow{background:#facc15;color:black;}
 
 .card:hover{
 transform:translateY(-6px);
+background:#374151;
 }
 
-/* ADMIN */
+.card img{
+width:80px;
+height:80px;
+object-fit:contain;
+margin-bottom:10px;
+}
 
-.admin-panel{
-display:none;
-background:#1f2937;
-margin:40px auto;
-padding:30px;
-border-radius:20px;
-max-width:900px;
+.card-text{
+font-size:16px;
+}
+
+.alert{
+color:#ff4d4d;
+font-weight:bold;
 }
 
 </style>
@@ -179,23 +119,13 @@ max-width:900px;
 
 <body>
 
-<div class="language-bar">
+<div class="topbar">
 
-<div class="left">
+<div class="clock" id="clock"></div>
 
-<button class="menu-btn" onclick="toggleMenu()">☰</button>
+<div class="center-menu" onclick="toggleFull()">☰</div>
 
-<div class="menu" id="menu">
-<button onclick="adminLogin()">Admin Panel</button>
-<button onclick="toggleFull()">Fullscreen</button>
-<button onclick="resetData()">Reset Data</button>
-</div>
-
-</div>
-
-<div class="center">
-
-<select onchange="changeLang(this.value)">
+<select class="language-select" onchange="changeLang(this.value)">
 <option value="th">🇹🇭 ไทย</option>
 <option value="en">🇺🇸 English</option>
 <option value="zh">🇨🇳 中文</option>
@@ -211,129 +141,80 @@ max-width:900px;
 
 </div>
 
-<div class="right">
-<div class="clock" id="clock"></div>
-</div>
-
-</div>
-
 <header>
 
-<div class="logo">✈ SMART AIRPORT SYSTEM</div>
-
 <h1 id="title"></h1>
-
 <div id="instruction"></div>
 
 <div class="message" id="message"></div>
 
 </header>
 
-<div class="card-group" id="cards"></div>
-
-<div class="admin-panel" id="adminPanel">
-<h2>Usage Statistics</h2>
-<canvas id="chart"></canvas>
-</div>
+<div class="grid" id="grid"></div>
 
 <script>
 
 /* CLOCK */
 
 setInterval(()=>{
-clock.innerText=new Date().toLocaleTimeString()
-},1000)
+document.getElementById("clock").innerText=
+new Date().toLocaleTimeString();
+},1000);
 
-/* MENU */
-
-function toggleMenu(){
-let m=document.getElementById("menu")
-m.style.display=m.style.display=="block"?"none":"block"
-}
 
 /* FULLSCREEN */
 
 function toggleFull(){
+
 if(!document.fullscreenElement){
-document.documentElement.requestFullscreen()
+
+document.documentElement.requestFullscreen();
+
 }else{
-document.exitFullscreen()
-}
+
+document.exitFullscreen();
+
 }
 
-/* ADMIN */
+}
 
-function adminLogin(){
-let pass=prompt("Password")
-if(pass=="654321"){
-adminPanel.style.display="block"
-drawChart()
-}else{
-alert("Wrong password")
-}
-}
 
 /* SPEECH */
 
-let currentLang="th"
+let voices=[];
+speechSynthesis.onvoiceschanged=()=>{voices=speechSynthesis.getVoices();};
+
+function speak(text,lang){
+
+speechSynthesis.cancel();
+
+let utter=new SpeechSynthesisUtterance(text);
+utter.lang=lang;
+
+let voice=voices.find(v=>v.lang.startsWith(lang.split("-")[0]));
+if(voice) utter.voice=voice;
+
+speechSynthesis.speak(utter);
+
+}
+
+
+/* LANG MAP */
 
 const langMap={
-th:"th-TH",en:"en-US",zh:"zh-CN",ja:"ja-JP",ko:"ko-KR",
-es:"es-ES",fr:"fr-FR",de:"de-DE",ru:"ru-RU",ar:"ar-SA",hi:"hi-IN"
-}
+th:"th-TH",
+en:"en-US",
+zh:"zh-CN",
+ja:"ja-JP",
+ko:"ko-KR",
+es:"es-ES",
+fr:"fr-FR",
+de:"de-DE",
+ru:"ru-RU",
+ar:"ar-SA",
+hi:"hi-IN"
+};
 
-function speak(text){
-
-speechSynthesis.cancel()
-
-let msg=new SpeechSynthesisUtterance(text)
-
-msg.lang=langMap[currentLang]
-
-msg.rate=0.95
-
-speechSynthesis.speak(msg)
-
-}
-
-/* BEEP SOUND */
-
-function beep(){
-let ctx=new AudioContext()
-let o=ctx.createOscillator()
-o.connect(ctx.destination)
-o.start()
-o.stop(ctx.currentTime+0.15)
-}
-
-/* STATS */
-
-let stats=JSON.parse(localStorage.getItem("stats")) || Array(10).fill(0)
-
-function saveStats(){
-localStorage.setItem("stats",JSON.stringify(stats))
-}
-
-function resetData(){
-stats=Array(10).fill(0)
-saveStats()
-alert("Reset complete")
-}
-
-/* IMAGES */
-
-const images=[
-"https://cdn-icons-png.flaticon.com/512/1048/1048947.png",
-"https://cdn-icons-png.flaticon.com/512/3103/3103446.png",
-"https://cdn-icons-png.flaticon.com/512/2972/2972185.png",
-"https://cdn-icons-png.flaticon.com/512/888/888879.png",
-"https://cdn-icons-png.flaticon.com/512/565/565547.png",
-"https://cdn-icons-png.flaticon.com/512/564/564619.png",
-"https://cdn-icons-png.flaticon.com/512/2909/2909763.png",
-"https://cdn-icons-png.flaticon.com/512/833/833472.png",
-"https://cdn-icons-png.flaticon.com/512/1828/1828843.png",
-"https://cdn-icons-png.flaticon.com/512/190/190411.png"
-]
 
 /* TRANSLATIONS */
 
@@ -342,106 +223,168 @@ const translations={
 th:{
 title:"สิ่งของห้ามโหลดใต้ท้องเครื่อง",
 instruction:"กรุณาเลือกสิ่งของ",
-items:["พาวเวอร์แบงค์","แบตเตอรี่","บุหรี่ไฟฟ้า","โน้ตบุ๊ก","ไฟแช็ก","วัตถุระเบิด","สารเคมี","อาวุธ","ไม่แน่ใจ","ไม่มีวัตถุอันตราย"],
 warning:"ห้ามโหลดใต้ท้องเครื่อง กรุณาถือขึ้นเครื่อง",
-ask:"กรุณาสอบถามเจ้าหน้าที่",
-safe:"ไม่มีวัตถุอันตราย"
-},
+items:[
+"พาวเวอร์แบงค์",
+"แบตเตอรี่",
+"บุหรี่ไฟฟ้า",
+"โน้ตบุ๊ก",
+"ไฟแช็ก",
+"วัตถุระเบิด",
+"สารเคมี",
+"อาวุธ",
+"ไม่แน่ใจ"
+]},
 
 en:{
 title:"Prohibited Items",
 instruction:"Please select an item",
-items:["Power Bank","Battery","E-Cigarette","Laptop","Lighter","Explosive","Chemical","Weapon","Unsure","No dangerous item"],
 warning:"Not allowed in checked baggage",
-ask:"Please ask airport staff",
-safe:"No dangerous item"
+items:[
+"Power Bank",
+"Battery",
+"E-Cigarette",
+"Laptop",
+"Lighter",
+"Explosives",
+"Chemical",
+"Weapon",
+"Not Sure"
+]},
+
+zh:{
+title:"禁止托运物品",
+instruction:"请选择物品",
+warning:"禁止托运，请随身携带",
+items:["充电宝","电池","电子烟","笔记本电脑","打火机","爆炸物","化学品","武器","不确定"]
+},
+
+ja:{
+title:"預け荷物禁止品",
+instruction:"項目を選択してください",
+warning:"受託手荷物に入れないでください",
+items:["モバイルバッテリー","電池","電子タバコ","ノートパソコン","ライター","爆発物","化学物質","武器","不明"]
+},
+
+ko:{
+title:"위탁 수하물 금지 물품",
+instruction:"물건을 선택하세요",
+warning:"위탁 수하물에 넣을 수 없습니다",
+items:["보조배터리","배터리","전자담배","노트북","라이터","폭발물","화학물질","무기","확실하지 않음"]
+},
+
+es:{
+title:"Artículos prohibidos",
+instruction:"Seleccione un artículo",
+warning:"No permitido en equipaje facturado",
+items:["Power bank","Batería","Cigarrillo electrónico","Laptop","Encendedor","Explosivos","Químicos","Arma","No seguro"]
+},
+
+fr:{
+title:"Objets interdits",
+instruction:"Sélectionnez un objet",
+warning:"Interdit en bagage enregistré",
+items:["Batterie externe","Batterie","Cigarette électronique","Ordinateur portable","Briquet","Explosifs","Produits chimiques","Arme","Pas sûr"]
+},
+
+de:{
+title:"Verbotene Gegenstände",
+instruction:"Bitte wählen",
+warning:"Nicht im aufgegebenen Gepäck erlaubt",
+items:["Powerbank","Batterie","E-Zigarette","Laptop","Feuerzeug","Explosivstoffe","Chemikalien","Waffe","Unsicher"]
+},
+
+ru:{
+title:"Запрещённые предметы",
+instruction:"Выберите предмет",
+warning:"Нельзя сдавать в багаж",
+items:["Пауэрбанк","Батарея","Электронная сигарета","Ноутбук","Зажигалка","Взрывчатка","Химикаты","Оружие","Не уверен"]
+},
+
+ar:{
+title:"مواد محظورة",
+instruction:"اختر العنصر",
+warning:"ممنوع في الأمتعة المسجلة",
+items:["باور بانك","بطارية","سيجارة إلكترونية","لابتوب","ولاعة","متفجرات","مواد كيميائية","سلاح","غير متأكد"]
+},
+
+hi:{
+title:"प्रतिबंधित वस्तुएँ",
+instruction:"कृपया वस्तु चुनें",
+warning:"चेक-इन बैग में अनुमति नहीं",
+items:["पावर बैंक","बैटरी","ई-सिगरेट","लैपटॉप","लाइटर","विस्फोटक","रसायन","हथियार","निश्चित नहीं"]
 }
+
+};
+
+
+/* IMAGE MAP */
+
+const images=[
+"https://cdn-icons-png.flaticon.com/512/3103/3103446.png",
+"https://cdn-icons-png.flaticon.com/512/633/633611.png",
+"https://cdn-icons-png.flaticon.com/512/2933/2933245.png",
+"https://cdn-icons-png.flaticon.com/512/3474/3474360.png",
+"https://cdn-icons-png.flaticon.com/512/1046/1046784.png",
+"https://cdn-icons-png.flaticon.com/512/1995/1995574.png",
+"https://cdn-icons-png.flaticon.com/512/2917/2917990.png",
+"https://cdn-icons-png.flaticon.com/512/3075/3075977.png",
+"https://cdn-icons-png.flaticon.com/512/1828/1828843.png"
+];
+
+
+/* BUILD UI */
+
+let currentLang="th";
+
+function render(){
+
+let data=translations[currentLang];
+
+document.getElementById("title").innerText=data.title;
+document.getElementById("instruction").innerText=data.instruction;
+
+let grid=document.getElementById("grid");
+
+grid.innerHTML="";
+
+data.items.forEach((item,i)=>{
+
+let card=document.createElement("div");
+card.className="card";
+
+card.innerHTML=`
+<img src="${images[i]}">
+<div class="card-text">${item}</div>
+`;
+
+card.onclick=()=>{
+
+document.getElementById("message").innerHTML=
+'<span class="alert">'+data.warning+'</span>';
+
+speak(data.warning,langMap[currentLang]);
+
+};
+
+grid.appendChild(card);
+
+});
 
 }
 
-/* UI */
 
 function changeLang(lang){
-currentLang=lang
-loadUI()
-}
 
-function loadUI(){
-
-let t=translations[currentLang]
-
-title.innerText=t.title
-instruction.innerText=t.instruction
-
-cards.innerHTML=""
-
-t.items.forEach((item,i)=>{
-
-let c=document.createElement("div")
-
-c.className="card"
-
-if(i==9)c.classList.add("green")
-else if(i==8)c.classList.add("yellow")
-else c.classList.add("red")
-
-c.innerHTML=`
-<img src="${images[i]}">
-${item}
-`
-
-c.onclick=()=>selectItem(i)
-
-cards.appendChild(c)
-
-})
+currentLang=lang;
+render();
 
 }
 
-function selectItem(i){
-
-let t=translations[currentLang]
-
-stats[i]++
-saveStats()
-
-let text=""
-
-if(i==9){
-text=t.safe
-}else if(i==8){
-text=t.ask
-}else{
-text=t.warning
-beep()
-}
-
-message.innerText=text
-
-speak(text)
-
-}
-
-/* CHART */
-
-function drawChart(){
-
-new Chart(document.getElementById("chart"),{
-type:"bar",
-data:{
-labels:translations.th.items,
-datasets:[{
-label:"Usage",
-data:stats
-}]
-}
-})
-
-}
 
 /* START */
 
-loadUI()
+render();
 
 </script>
 
