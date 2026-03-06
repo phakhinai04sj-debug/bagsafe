@@ -135,6 +135,7 @@ margin:auto;
 border-radius:25px;
 height:200px;
 display:flex;
+flex-direction:column;
 align-items:center;
 justify-content:center;
 cursor:pointer;
@@ -142,6 +143,12 @@ font-size:18px;
 padding:20px;
 transition:.3s;
 font-weight:500;
+}
+
+.card img{
+width:60px;
+height:60px;
+margin-bottom:10px;
 }
 
 .card:hover{
@@ -253,7 +260,7 @@ max-width:900px;
 
 </div>
 
-<script>
+  <script>
 
 /* CLOCK */
 
@@ -333,6 +340,23 @@ stats=Array(10).fill(0)
 saveStats()
 alert("Data reset")
 }
+
+/* IMAGES */
+
+const images=[
+
+"https://cdn-icons-png.flaticon.com/512/1048/1048953.png",
+"https://cdn-icons-png.flaticon.com/512/3103/3103446.png",
+"https://cdn-icons-png.flaticon.com/512/2933/2933245.png",
+"https://cdn-icons-png.flaticon.com/512/3474/3474360.png",
+"https://cdn-icons-png.flaticon.com/512/1046/1046784.png",
+"https://cdn-icons-png.flaticon.com/512/616/616490.png",
+"https://cdn-icons-png.flaticon.com/512/2917/2917990.png",
+"https://cdn-icons-png.flaticon.com/512/3075/3075977.png",
+"https://cdn-icons-png.flaticon.com/512/1828/1828843.png",
+"https://cdn-icons-png.flaticon.com/512/190/190411.png"
+
+]
 
 /* TRANSLATIONS */
 
@@ -471,7 +495,14 @@ else{
 c.classList.add("danger")
 }
 
-c.innerText=item
+let img=document.createElement("img")
+img.src=images[i]
+
+let text=document.createElement("div")
+text.innerText=item
+
+c.appendChild(img)
+c.appendChild(text)
 
 c.onclick=()=>selectItem(i)
 
