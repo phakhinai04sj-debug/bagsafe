@@ -4,16 +4,16 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>Smart Airport Kiosk 4.0 PRO</title>
+<title>Smart Airport Kiosk 4.0</title>
 
-<link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;600&family=Inter:wght@300;500;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;600&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
 <style>
 
 *{
 box-sizing:border-box;
-font-family:'Inter','Kanit',sans-serif;
+font-family:'Kanit',sans-serif;
 }
 
 body{
@@ -57,6 +57,8 @@ color:white;
 cursor:pointer;
 }
 
+/* MENU */
+
 .menu{
 display:none;
 position:absolute;
@@ -70,15 +72,17 @@ box-shadow:0 10px 25px rgba(0,0,0,.5);
 
 .menu button{
 display:block;
-width:160px;
+width:170px;
 margin:5px 0;
-padding:8px;
+padding:10px;
 border:none;
 border-radius:8px;
 background:#374151;
 color:white;
 cursor:pointer;
 }
+
+/* LANGUAGE */
 
 .language-bar select{
 padding:8px 14px;
@@ -87,6 +91,8 @@ border:none;
 background:#1f2937;
 color:white;
 }
+
+/* CLOCK */
 
 .clock{
 font-size:14px;
@@ -133,46 +139,28 @@ margin:auto;
 
 .card{
 border-radius:25px;
-height:200px;
+height:210px;
 display:flex;
+flex-direction:column;
 align-items:center;
 justify-content:center;
 cursor:pointer;
 font-size:18px;
 padding:20px;
 transition:.3s;
-font-weight:500;
 }
+
+.card img{
+width:60px;
+margin-bottom:10px;
+}
+
+.red{background:#dc2626;}
+.green{background:#16a34a;}
+.yellow{background:#facc15;color:black;}
 
 .card:hover{
 transform:translateY(-6px);
-}
-
-/* COLORS */
-
-.danger{
-background:#dc2626;
-}
-
-.danger:hover{
-background:#ef4444;
-}
-
-.safe{
-background:#16a34a;
-}
-
-.safe:hover{
-background:#22c55e;
-}
-
-.unknown{
-background:#eab308;
-color:black;
-}
-
-.unknown:hover{
-background:#facc15;
 }
 
 /* ADMIN */
@@ -198,11 +186,9 @@ max-width:900px;
 <button class="menu-btn" onclick="toggleMenu()">☰</button>
 
 <div class="menu" id="menu">
-
 <button onclick="adminLogin()">Admin Panel</button>
-<button onclick="toggleFull()">Full Screen</button>
+<button onclick="toggleFull()">Fullscreen</button>
 <button onclick="resetData()">Reset Data</button>
-
 </div>
 
 </div>
@@ -246,11 +232,8 @@ max-width:900px;
 <div class="card-group" id="cards"></div>
 
 <div class="admin-panel" id="adminPanel">
-
 <h2>Usage Statistics</h2>
-
 <canvas id="chart"></canvas>
-
 </div>
 
 <script>
@@ -281,43 +264,46 @@ document.exitFullscreen()
 /* ADMIN */
 
 function adminLogin(){
-let pass=prompt("Enter Password")
+let pass=prompt("Password")
 if(pass=="654321"){
-document.getElementById("adminPanel").style.display="block"
+adminPanel.style.display="block"
 drawChart()
 }else{
 alert("Wrong password")
 }
 }
 
-/* SOUND */
-
-const beep=new Audio("https://actions.google.com/sounds/v1/alarms/beep_short.ogg")
-
 /* SPEECH */
 
 let currentLang="th"
 
 const langMap={
-th:"th-TH",
-en:"en-US",
-zh:"zh-CN",
-ja:"ja-JP",
-ko:"ko-KR",
-es:"es-ES",
-fr:"fr-FR",
-de:"de-DE",
-ru:"ru-RU",
-ar:"ar-SA",
-hi:"hi-IN"
+th:"th-TH",en:"en-US",zh:"zh-CN",ja:"ja-JP",ko:"ko-KR",
+es:"es-ES",fr:"fr-FR",de:"de-DE",ru:"ru-RU",ar:"ar-SA",hi:"hi-IN"
 }
 
 function speak(text){
+
 speechSynthesis.cancel()
+
 let msg=new SpeechSynthesisUtterance(text)
+
 msg.lang=langMap[currentLang]
+
 msg.rate=0.95
+
 speechSynthesis.speak(msg)
+
+}
+
+/* BEEP SOUND */
+
+function beep(){
+let ctx=new AudioContext()
+let o=ctx.createOscillator()
+o.connect(ctx.destination)
+o.start()
+o.stop(ctx.currentTime+0.15)
 }
 
 /* STATS */
@@ -331,8 +317,23 @@ localStorage.setItem("stats",JSON.stringify(stats))
 function resetData(){
 stats=Array(10).fill(0)
 saveStats()
-alert("Data reset")
+alert("Reset complete")
 }
+
+/* IMAGES */
+
+const images=[
+"https://cdn-icons-png.flaticon.com/512/1048/1048947.png",
+"https://cdn-icons-png.flaticon.com/512/3103/3103446.png",
+"https://cdn-icons-png.flaticon.com/512/2972/2972185.png",
+"https://cdn-icons-png.flaticon.com/512/888/888879.png",
+"https://cdn-icons-png.flaticon.com/512/565/565547.png",
+"https://cdn-icons-png.flaticon.com/512/564/564619.png",
+"https://cdn-icons-png.flaticon.com/512/2909/2909763.png",
+"https://cdn-icons-png.flaticon.com/512/833/833472.png",
+"https://cdn-icons-png.flaticon.com/512/1828/1828843.png",
+"https://cdn-icons-png.flaticon.com/512/190/190411.png"
+]
 
 /* TRANSLATIONS */
 
@@ -340,101 +341,20 @@ const translations={
 
 th:{
 title:"สิ่งของห้ามโหลดใต้ท้องเครื่อง",
-instruction:"กรุณาเลือกสิ่งของในกระเป๋าของคุณ",
+instruction:"กรุณาเลือกสิ่งของ",
 items:["พาวเวอร์แบงค์","แบตเตอรี่","บุหรี่ไฟฟ้า","โน้ตบุ๊ก","ไฟแช็ก","วัตถุระเบิด","สารเคมี","อาวุธ","ไม่แน่ใจ","ไม่มีวัตถุอันตราย"],
-warning:"ไม่สามารถโหลดใต้ท้องเครื่อง กรุณาถือขึ้นเครื่อง",
-ask:"กรุณาสอบถามเจ้าหน้าที่สนามบิน",
-safe:"ไม่มีวัตถุอันตราย สามารถโหลดกระเป๋าได้"
+warning:"ห้ามโหลดใต้ท้องเครื่อง กรุณาถือขึ้นเครื่อง",
+ask:"กรุณาสอบถามเจ้าหน้าที่",
+safe:"ไม่มีวัตถุอันตราย"
 },
 
 en:{
-title:"Prohibited Items in Checked Baggage",
-instruction:"Please select the item in your bag",
-items:["Power Bank","Battery","E-Cigarette","Laptop","Lighter","Explosive","Chemical","Weapon","Unsure","No Dangerous Items"],
+title:"Prohibited Items",
+instruction:"Please select an item",
+items:["Power Bank","Battery","E-Cigarette","Laptop","Lighter","Explosive","Chemical","Weapon","Unsure","No dangerous item"],
 warning:"Not allowed in checked baggage",
 ask:"Please ask airport staff",
-safe:"No dangerous items detected"
-},
-
-zh:{
-title:"托运行李禁止物品",
-instruction:"请选择您的物品",
-items:["充电宝","电池","电子烟","笔记本电脑","打火机","爆炸物","化学品","武器","不确定","没有危险物品"],
-warning:"禁止托运 请随身携带",
-ask:"请咨询工作人员",
-safe:"没有危险物品"
-},
-
-ja:{
-title:"預け荷物禁止物",
-instruction:"物品を選択してください",
-items:["モバイルバッテリー","電池","電子タバコ","ノートパソコン","ライター","爆発物","化学物質","武器","不明","危険物なし"],
-warning:"預け入れ不可 機内持ち込みしてください",
-ask:"係員にお尋ねください",
-safe:"危険物はありません"
-},
-
-ko:{
-title:"위탁 수하물 금지 물품",
-instruction:"물품을 선택하세요",
-items:["보조배터리","배터리","전자담배","노트북","라이터","폭발물","화학물질","무기","잘 모름","위험물 없음"],
-warning:"위탁 수하물 금지",
-ask:"직원에게 문의하세요",
-safe:"위험 물품이 없습니다"
-},
-
-es:{
-title:"Artículos prohibidos",
-instruction:"Seleccione un artículo",
-items:["Batería portátil","Batería","Cigarrillo electrónico","Portátil","Encendedor","Explosivo","Químico","Arma","No seguro","Sin objetos peligrosos"],
-warning:"No permitido en equipaje facturado",
-ask:"Pregunte al personal",
-safe:"No hay objetos peligrosos"
-},
-
-fr:{
-title:"Articles interdits",
-instruction:"Sélectionnez un article",
-items:["Batterie externe","Batterie","Cigarette électronique","Ordinateur portable","Briquet","Explosif","Produit chimique","Arme","Pas sûr","Aucun objet dangereux"],
-warning:"Interdit en soute",
-ask:"Veuillez demander au personnel",
-safe:"Aucun objet dangereux"
-},
-
-de:{
-title:"Verbotene Gegenstände",
-instruction:"Artikel auswählen",
-items:["Powerbank","Batterie","E-Zigarette","Laptop","Feuerzeug","Explosivstoff","Chemikalie","Waffe","Unsicher","Keine gefährlichen Gegenstände"],
-warning:"Nicht im Aufgabegepäck erlaubt",
-ask:"Bitte Personal fragen",
-safe:"Keine gefährlichen Gegenstände"
-},
-
-ru:{
-title:"Запрещённые предметы",
-instruction:"Выберите предмет",
-items:["Пауэрбанк","Батарея","Электронная сигарета","Ноутбук","Зажигалка","Взрывчатка","Химикаты","Оружие","Не уверен","Нет опасных предметов"],
-warning:"Запрещено в багаже",
-ask:"Обратитесь к сотруднику",
-safe:"Нет опасных предметов"
-},
-
-ar:{
-title:"مواد محظورة",
-instruction:"اختر عنصرا",
-items:["بنك طاقة","بطارية","سيجارة إلكترونية","كمبيوتر محمول","ولاعة","متفجرات","مواد كيميائية","سلاح","غير متأكد","لا توجد مواد خطرة"],
-warning:"ممنوع في الأمتعة المسجلة",
-ask:"يرجى سؤال الموظف",
-safe:"لا توجد مواد خطرة"
-},
-
-hi:{
-title:"प्रतिबंधित वस्तुएँ",
-instruction:"कृपया वस्तु चुनें",
-items:["पावर बैंक","बैटरी","ई-सिगरेट","लैपटॉप","लाइटर","विस्फोटक","रसायन","हथियार","पता नहीं","कोई खतरनाक वस्तु नहीं"],
-warning:"चेक-इन बैगेज में अनुमति नहीं",
-ask:"कृपया स्टाफ से पूछें",
-safe:"कोई खतरनाक वस्तु नहीं"
+safe:"No dangerous item"
 }
 
 }
@@ -461,17 +381,14 @@ let c=document.createElement("div")
 
 c.className="card"
 
-if(i==9){
-c.classList.add("safe")
-}
-else if(i==8){
-c.classList.add("unknown")
-}
-else{
-c.classList.add("danger")
-}
+if(i==9)c.classList.add("green")
+else if(i==8)c.classList.add("yellow")
+else c.classList.add("red")
 
-c.innerText=item
+c.innerHTML=`
+<img src="${images[i]}">
+${item}
+`
 
 c.onclick=()=>selectItem(i)
 
@@ -491,21 +408,16 @@ saveStats()
 let text=""
 
 if(i==9){
-
 text=t.safe
-
 }else if(i==8){
-
 text=t.ask
-
 }else{
-
-beep.play()
 text=t.warning
-
+beep()
 }
 
 message.innerText=text
+
 speak(text)
 
 }
