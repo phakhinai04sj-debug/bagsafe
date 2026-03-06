@@ -3,7 +3,6 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
 <title>Smart Airport Kiosk 4.0 PRO</title>
 
 <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;600&family=Inter:wght@300;500;600&display=swap" rel="stylesheet">
@@ -37,8 +36,7 @@ z-index:100;
 box-shadow:0 4px 15px rgba(0,0,0,.4);
 }
 
-.language-bar .left,
-.language-bar .right{
+.left,.right{
 display:flex;
 align-items:center;
 gap:15px;
@@ -58,6 +56,33 @@ color:white;
 cursor:pointer;
 }
 
+/* MENU */
+
+.menu{
+display:none;
+position:absolute;
+top:55px;
+left:20px;
+background:#1f2937;
+border-radius:10px;
+padding:10px;
+box-shadow:0 10px 25px rgba(0,0,0,.5);
+}
+
+.menu button{
+display:block;
+width:160px;
+margin:5px 0;
+padding:8px;
+border:none;
+border-radius:8px;
+background:#374151;
+color:white;
+cursor:pointer;
+}
+
+/* LANGUAGE */
+
 .language-bar select{
 padding:8px 14px;
 border-radius:10px;
@@ -66,18 +91,11 @@ background:#1f2937;
 color:white;
 }
 
+/* CLOCK */
+
 .clock{
 font-size:14px;
 opacity:.8;
-}
-
-.language-bar button{
-background:#1f2937;
-color:white;
-border:none;
-padding:8px 12px;
-border-radius:10px;
-cursor:pointer;
 }
 
 /* HEADER */
@@ -161,6 +179,20 @@ max-width:900px;
 
 <div class="left">
 
+<button class="menu-btn" onclick="toggleMenu()">☰</button>
+
+<div class="menu" id="menu">
+
+<button onclick="adminLogin()">Admin Panel</button>
+<button onclick="toggleFull()">Full Screen</button>
+<button onclick="resetData()">Reset Data</button>
+
+</div>
+
+</div>
+
+<div class="center">
+
 <select onchange="changeLang(this.value)">
 <option value="th">🇹🇭 ไทย</option>
 <option value="en">🇺🇸 English</option>
@@ -177,15 +209,8 @@ max-width:900px;
 
 </div>
 
-<div class="center">
-<button class="menu-btn" onclick="openAdmin()">☰</button>
-</div>
-
 <div class="right">
-
-<button onclick="toggleFull()">⛶</button>
 <div class="clock" id="clock"></div>
-
 </div>
 
 </div>
@@ -210,10 +235,6 @@ max-width:900px;
 
 <canvas id="chart"></canvas>
 
-<br><br>
-
-<button onclick="clearStats()">Clear Data</button>
-
 </div>
 
 <script>
@@ -221,20 +242,36 @@ max-width:900px;
 /* CLOCK */
 
 setInterval(()=>{
-document.getElementById("clock").innerText=
-new Date().toLocaleTimeString()
+clock.innerText=new Date().toLocaleTimeString()
 },1000)
+
+/* MENU */
+
+function toggleMenu(){
+let m=document.getElementById("menu")
+m.style.display=m.style.display=="block"?"none":"block"
+}
 
 /* FULLSCREEN */
 
 function toggleFull(){
-
 if(!document.fullscreenElement){
 document.documentElement.requestFullscreen()
 }else{
 document.exitFullscreen()
 }
+}
 
+/* ADMIN */
+
+function adminLogin(){
+let pass=prompt("Enter Password")
+if(pass=="654321"){
+document.getElementById("adminPanel").style.display="block"
+drawChart()
+}else{
+alert("Wrong password")
+}
 }
 
 /* SPEECH */
@@ -256,121 +293,48 @@ hi:"hi-IN"
 }
 
 function speak(text){
-
 speechSynthesis.cancel()
-
 let msg=new SpeechSynthesisUtterance(text)
-
 msg.lang=langMap[currentLang]
-
 msg.rate=0.95
-
 speechSynthesis.speak(msg)
+}
 
+/* STATS */
+
+let stats=JSON.parse(localStorage.getItem("stats")) || Array(9).fill(0)
+
+function saveStats(){
+localStorage.setItem("stats",JSON.stringify(stats))
+}
+
+function resetData(){
+stats=Array(9).fill(0)
+saveStats()
+alert("Data reset")
 }
 
 /* TRANSLATIONS */
 
 const translations={
-
-th:{
-title:"สิ่งของห้ามโหลดใต้ท้องเครื่อง",
-instruction:"กรุณาเลือกสิ่งของ",
-items:["พาวเวอร์แบงค์","แบตเตอรี่","บุหรี่ไฟฟ้า","โน้ตบุ๊ก","ไฟแช็ก","วัตถุระเบิด","สารเคมี","อาวุธ","ไม่แน่ใจ"],
-warning:"ห้ามโหลดใต้ท้องเครื่อง กรุณาถือขึ้นเครื่อง",
-ask:"กรุณาสอบถามเจ้าหน้าที่"
-},
-
-en:{
-title:"Prohibited Items",
-instruction:"Please select an item",
-items:["Power Bank","Battery","E-Cigarette","Laptop","Lighter","Explosive","Chemical","Weapon","Unsure Item"],
-warning:"Not allowed in checked baggage",
-ask:"Please ask airport staff"
-},
-
-zh:{
-title:"禁止托运行李物品",
-instruction:"请选择物品",
-items:["充电宝","电池","电子烟","笔记本电脑","打火机","爆炸物","化学品","武器","不确定"],
-warning:"禁止托运，请随身携带",
-ask:"请咨询工作人员"
-},
-
-ja:{
-title:"預け荷物禁止物",
-instruction:"物品を選択してください",
-items:["モバイルバッテリー","電池","電子タバコ","ノートパソコン","ライター","爆発物","化学物質","武器","不明"],
-warning:"預け入れ不可 機内持ち込みしてください",
-ask:"係員にお尋ねください"
-},
-
-ko:{
-title:"위탁 수하물 금지 물품",
-instruction:"물품을 선택하세요",
-items:["보조배터리","배터리","전자담배","노트북","라이터","폭발물","화학물질","무기","잘 모름"],
-warning:"위탁 수하물 금지 기내 반입하세요",
-ask:"직원에게 문의하세요"
-},
-
-es:{
-title:"Artículos prohibidos",
-instruction:"Seleccione un artículo",
-items:["Batería portátil","Batería","Cigarrillo electrónico","Portátil","Encendedor","Explosivo","Químico","Arma","No seguro"],
-warning:"No permitido en equipaje facturado",
-ask:"Pregunte al personal"
-},
-
-fr:{
-title:"Articles interdits",
-instruction:"Sélectionnez un article",
-items:["Batterie externe","Batterie","Cigarette électronique","Ordinateur portable","Briquet","Explosif","Produit chimique","Arme","Pas sûr"],
-warning:"Interdit en soute",
-ask:"Veuillez demander au personnel"
-},
-
-de:{
-title:"Verbotene Gegenstände",
-instruction:"Artikel auswählen",
-items:["Powerbank","Batterie","E-Zigarette","Laptop","Feuerzeug","Explosiv","Chemikalie","Waffe","Unsicher"],
-warning:"Nicht im Aufgabegepäck erlaubt",
-ask:"Bitte Personal fragen"
-},
-
-ru:{
-title:"Запрещённые предметы",
-instruction:"Выберите предмет",
-items:["Пауэрбанк","Батарея","Электронная сигарета","Ноутбук","Зажигалка","Взрывчатка","Химикаты","Оружие","Не уверен"],
-warning:"Запрещено в багаже",
-ask:"Обратитесь к сотруднику"
-},
-
-ar:{
-title:"مواد محظورة",
-instruction:"اختر عنصرا",
-items:["بنك طاقة","بطارية","سيجارة إلكترونية","كمبيوتر محمول","ولاعة","متفجرات","مواد كيميائية","سلاح","غير متأكد"],
-warning:"ممنوع في الأمتعة المسجلة",
-ask:"يرجى سؤال الموظف"
-},
-
-hi:{
-title:"प्रतिबंधित वस्तुएँ",
-instruction:"कृपया वस्तु चुनें",
-items:["पावर बैंक","बैटरी","ई-सिगरेट","लैपटॉप","लाइटर","विस्फोटक","रसायन","हथियार","पता नहीं"],
-warning:"चेक-इन बैगेज में अनुमति नहीं",
-ask:"कृपया स्टाफ से पूछें"
-}
-
+th:{title:"สิ่งของห้ามโหลดใต้ท้องเครื่อง",instruction:"กรุณาเลือกสิ่งของ",items:["พาวเวอร์แบงค์","แบตเตอรี่","บุหรี่ไฟฟ้า","โน้ตบุ๊ก","ไฟแช็ก","วัตถุระเบิด","สารเคมี","อาวุธ","ไม่แน่ใจ"],warning:"ห้ามโหลดใต้ท้องเครื่อง กรุณาถือขึ้นเครื่อง",ask:"กรุณาสอบถามเจ้าหน้าที่"},
+en:{title:"Prohibited Items",instruction:"Please select an item",items:["Power Bank","Battery","E-Cigarette","Laptop","Lighter","Explosive","Chemical","Weapon","Unsure Item"],warning:"Not allowed in checked baggage",ask:"Please ask airport staff"},
+zh:{title:"禁止托运行李物品",instruction:"请选择物品",items:["充电宝","电池","电子烟","笔记本电脑","打火机","爆炸物","化学品","武器","不确定"],warning:"禁止托运，请随身携带",ask:"请咨询工作人员"},
+ja:{title:"預け荷物禁止物",instruction:"物品を選択してください",items:["モバイルバッテリー","電池","電子タバコ","ノートパソコン","ライター","爆発物","化学物質","武器","不明"],warning:"預け入れ不可 機内持ち込みしてください",ask:"係員にお尋ねください"},
+ko:{title:"위탁 수하물 금지 물품",instruction:"물품을 선택하세요",items:["보조배터리","배터리","전자담배","노트북","라이터","폭발물","화학물질","무기","잘 모름"],warning:"위탁 수하물 금지 기내 반입하세요",ask:"직원에게 문의하세요"},
+es:{title:"Artículos prohibidos",instruction:"Seleccione un artículo",items:["Batería portátil","Batería","Cigarrillo electrónico","Portátil","Encendedor","Explosivo","Químico","Arma","No seguro"],warning:"No permitido en equipaje facturado",ask:"Pregunte al personal"},
+fr:{title:"Articles interdits",instruction:"Sélectionnez un article",items:["Batterie externe","Batterie","Cigarette électronique","Ordinateur portable","Briquet","Explosif","Produit chimique","Arme","Pas sûr"],warning:"Interdit en soute",ask:"Veuillez demander au personnel"},
+de:{title:"Verbotene Gegenstände",instruction:"Artikel auswählen",items:["Powerbank","Batterie","E-Zigarette","Laptop","Feuerzeug","Explosivstoff","Chemikalie","Waffe","Unsicher"],warning:"Nicht im Aufgabegepäck erlaubt",ask:"Bitte Personal fragen"},
+ru:{title:"Запрещённые предметы",instruction:"Выберите предмет",items:["Пауэрбанк","Батарея","Электронная сигарета","Ноутбук","Зажигалка","Взрывчатка","Химикаты","Оружие","Не уверен"],warning:"Запрещено в багаже",ask:"Обратитесь к сотруднику"},
+ar:{title:"مواد محظورة",instruction:"اختر عنصرا",items:["بنك طاقة","بطارية","سيجارة إلكترونية","كمبيوتر محمول","ولاعة","متفجرات","مواد كيميائية","سلاح","غير متأكد"],warning:"ممنوع في الأمتعة المسجلة",ask:"يرجى سؤال الموظف"},
+hi:{title:"प्रतिबंधित वस्तुएँ",instruction:"कृपया वस्तु चुनें",items:["पावर बैंक","बैटरी","ई-सिगरेट","लैपटॉप","लाइटर","विस्फोटक","रसायन","हथियार","पता नहीं"],warning:"चेक-इन बैगेज में अनुमति नहीं",ask:"कृपया स्टाफ से पूछें"}
 }
 
 /* UI */
 
 function changeLang(lang){
-
 currentLang=lang
-
 loadUI()
-
 }
 
 function loadUI(){
@@ -402,6 +366,9 @@ function selectItem(i){
 
 let t=translations[currentLang]
 
+stats[i]++
+saveStats()
+
 let text=i==8?t.ask:t.warning
 
 message.innerText=text
@@ -410,13 +377,20 @@ speak(text)
 
 }
 
-/* ADMIN */
+/* CHART */
 
-function openAdmin(){
+function drawChart(){
 
-let p=document.getElementById("adminPanel")
-
-p.style.display=p.style.display=="block"?"none":"block"
+new Chart(document.getElementById("chart"),{
+type:"bar",
+data:{
+labels:translations.th.items,
+datasets:[{
+label:"Usage",
+data:stats
+}]
+}
+})
 
 }
 
