@@ -3,123 +3,224 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Smart Airport Kiosk 4.5</title>
 
-<link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;600&display=swap" rel="stylesheet">
+<title>Smart Airport Kiosk 4.0 PRO</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;600&family=Inter:wght@300;500;600&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
 <style>
 
-*{box-sizing:border-box;font-family:Kanit,sans-serif}
+*{
+box-sizing:border-box;
+font-family:'Inter','Kanit',sans-serif;
+}
 
 body{
 margin:0;
 background:linear-gradient(135deg,#0f172a,#1e293b);
 color:white;
-text-align:center
+text-align:center;
 }
+
+/* TOP BAR */
 
 .language-bar{
+background:#0f172a;
+padding:12px 20px;
 display:flex;
-justify-content:center;
-padding:15px;
-background:#0f172a
-}
-
-select{
-padding:10px 15px;
-border-radius:10px;
-border:none
-}
-
-header{padding:30px}
-
-.card-group{
-display:grid;
-grid-template-columns:repeat(auto-fit,minmax(200px,1fr));
-gap:20px;
-padding:30px;
-max-width:1100px;
-margin:auto
-}
-
-.card{
-height:180px;
-border-radius:20px;
-display:flex;
-flex-direction:column;
-justify-content:center;
 align-items:center;
+justify-content:space-between;
+position:sticky;
+top:0;
+z-index:100;
+box-shadow:0 4px 15px rgba(0,0,0,.4);
+}
+
+.left,.right{
+display:flex;
+align-items:center;
+gap:15px;
+}
+
+.center{
+position:absolute;
+left:50%;
+transform:translateX(-50%);
+}
+
+.menu-btn{
+font-size:26px;
+background:none;
+border:none;
+color:white;
 cursor:pointer;
-transition:.3s
 }
 
-.card img{
-width:65px;
-margin-bottom:10px
+.menu{
+display:none;
+position:absolute;
+top:55px;
+left:20px;
+background:#1f2937;
+border-radius:10px;
+padding:10px;
+box-shadow:0 10px 25px rgba(0,0,0,.5);
 }
 
-.card:hover{transform:translateY(-5px)}
+.menu button{
+display:block;
+width:160px;
+margin:5px 0;
+padding:8px;
+border:none;
+border-radius:8px;
+background:#374151;
+color:white;
+cursor:pointer;
+}
 
-.danger{background:#dc2626}
-.safe{background:#16a34a}
-.unknown{background:#eab308;color:black}
+.language-bar select{
+padding:8px 14px;
+border-radius:10px;
+border:none;
+background:#1f2937;
+color:white;
+}
+
+.clock{
+font-size:14px;
+opacity:.8;
+}
+
+/* HEADER */
+
+header{
+padding:40px 20px;
+}
+
+.logo{
+opacity:.7;
+margin-bottom:10px;
+}
+
+h1{
+font-size:28px;
+margin:10px 0;
+}
 
 .message{
 font-size:22px;
-min-height:40px
+min-height:50px;
+font-weight:500;
+}
+
+/* CARDS */
+
+.card-group{
+display:grid;
+grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
+gap:25px;
+padding:30px;
+max-width:1200px;
+margin:auto;
+}
+
+.card{
+border-radius:25px;
+height:200px;
+display:flex;
+flex-direction:column;
+align-items:center;
+justify-content:center;
+cursor:pointer;
+font-size:18px;
+padding:20px;
+transition:.3s;
+font-weight:500;
+background:#374151;
+}
+
+.card img{
+width:60px;
+height:60px;
+margin-bottom:10px;
+}
+
+.card:hover{
+transform:translateY(-6px);
+}
+
+/* COLOR AFTER CLICK */
+
+.danger{background:#dc2626;}
+.safe{background:#16a34a;}
+.unknown{background:#eab308;color:black;}
+
+.admin-panel{
+display:none;
+background:#1f2937;
+margin:40px auto;
+padding:30px;
+border-radius:20px;
+max-width:900px;
 }
 
 </style>
 </head>
 
 <body>
-
-<div class="language-bar">
-
-<select onchange="changeLang(this.value)">
-
-<option value="th">🇹🇭 ไทย</option>
-<option value="en">🇺🇸 English</option>
-<option value="zh">🇨🇳 中文</option>
-<option value="ja">🇯🇵 日本語</option>
-<option value="ko">🇰🇷 한국어</option>
-<option value="es">🇪🇸 Español</option>
-<option value="fr">🇫🇷 Français</option>
-<option value="de">🇩🇪 Deutsch</option>
-<option value="ru">🇷🇺 Русский</option>
-<option value="ar">🇸🇦 العربية</option>
-<option value="hi">🇮🇳 हिन्दी</option>
-
-</select>
-
-</div>
-
-<header>
-
-<h1 id="title"></h1>
-<div id="instruction"></div>
-<div class="message" id="message"></div>
-
-</header>
-
-<div class="card-group" id="cards"></div>
-
 <script>
 
-/* LANGUAGE */
+/* CLOCK */
+
+setInterval(()=>{
+clock.innerText=new Date().toLocaleTimeString()
+},1000)
+
+/* MENU */
+
+function toggleMenu(){
+let m=document.getElementById("menu")
+m.style.display=m.style.display=="block"?"none":"block"
+}
+
+/* FULLSCREEN */
+
+function toggleFull(){
+if(!document.fullscreenElement){
+document.documentElement.requestFullscreen()
+}else{
+document.exitFullscreen()
+}
+}
+
+/* ADMIN */
+
+function adminLogin(){
+let pass=prompt("Enter Password")
+if(pass=="654321"){
+document.getElementById("adminPanel").style.display="block"
+drawChart()
+}else{
+alert("Wrong password")
+}
+}
+
+/* BEEP */
+
+const beep=new Audio("https://actions.google.com/sounds/v1/alarms/beep_short.ogg")
+
+/* SPEECH FIX (แก้เสียงญี่ปุ่น) */
 
 let currentLang="th"
-
-/* SPEECH */
-
 let voices=[]
 
-speechSynthesis.onvoiceschanged=()=>{
-
+function loadVoices(){
 voices=speechSynthesis.getVoices()
-
 }
+
+speechSynthesis.onvoiceschanged=loadVoices
 
 function speak(text){
 
@@ -129,7 +230,9 @@ let msg=new SpeechSynthesisUtterance(text)
 
 let voice=voices.find(v=>v.lang.toLowerCase().startsWith(currentLang))
 
-if(voice){msg.voice=voice}
+if(voice){
+msg.voice=voice
+}
 
 msg.rate=0.95
 
@@ -137,137 +240,38 @@ speechSynthesis.speak(msg)
 
 }
 
-/* ICONS */
+/* IMAGES (แก้รูปให้ตรง) */
 
 const images=[
 
-"https://cdn-icons-png.flaticon.com/512/1048/1048953.png",
-"https://cdn-icons-png.flaticon.com/512/3103/3103446.png",
-"https://cdn-icons-png.flaticon.com/512/2933/2933245.png",
-"https://cdn-icons-png.flaticon.com/512/3474/3474360.png",
-"https://cdn-icons-png.flaticon.com/512/1046/1046784.png",
-"https://cdn-icons-png.flaticon.com/512/616/616490.png",
-"https://cdn-icons-png.flaticon.com/512/2917/2917990.png",
-"https://cdn-icons-png.flaticon.com/512/3075/3075977.png",
-"https://cdn-icons-png.flaticon.com/512/1828/1828843.png",
-"https://cdn-icons-png.flaticon.com/512/190/190411.png"
+"https://cdn-icons-png.flaticon.com/512/190/190411.png",   // safe
+"https://cdn-icons-png.flaticon.com/512/1048/1048953.png", // powerbank
+"https://cdn-icons-png.flaticon.com/512/3103/3103446.png", // battery
+"https://cdn-icons-png.flaticon.com/512/2933/2933245.png", // vape
+"https://cdn-icons-png.flaticon.com/512/3474/3474360.png", // laptop
+"https://cdn-icons-png.flaticon.com/512/1046/1046784.png", // lighter
+"https://cdn-icons-png.flaticon.com/512/616/616490.png",   // explosive
+"https://cdn-icons-png.flaticon.com/512/2917/2917990.png", // chemical
+"https://cdn-icons-png.flaticon.com/512/3075/3075977.png", // weapon
+"https://cdn-icons-png.flaticon.com/512/1828/1828843.png"  // unsure
 
 ]
 
-/* TRANSLATIONS */
+  /* STATS */
 
-const translations={
+let stats=JSON.parse(localStorage.getItem("stats")) || Array(10).fill(0)
 
-th:{
-title:"สิ่งของห้ามโหลดใต้ท้องเครื่อง",
-instruction:"กรุณาเลือกสิ่งของในกระเป๋า",
-items:["พาวเวอร์แบงค์","แบตเตอรี่","บุหรี่ไฟฟ้า","โน้ตบุ๊ก","ไฟแช็ก","วัตถุระเบิด","สารเคมี","อาวุธ","ไม่แน่ใจ","ไม่มีวัตถุอันตราย"],
-warning:"ห้ามโหลดใต้เครื่อง กรุณาถือขึ้นเครื่อง",
-ask:"กรุณาสอบถามเจ้าหน้าที่",
-safe:"ไม่มีวัตถุอันตราย"
-},
-
-en:{
-title:"Prohibited Items in Checked Baggage",
-instruction:"Please select item in your bag",
-items:["Power Bank","Battery","E-Cigarette","Laptop","Lighter","Explosive","Chemical","Weapon","Unsure","No Dangerous Items"],
-warning:"Not allowed in checked baggage",
-ask:"Please ask airport staff",
-safe:"No dangerous items"
-},
-
-zh:{
-title:"托运行李禁止物品",
-instruction:"请选择物品",
-items:["充电宝","电池","电子烟","笔记本电脑","打火机","爆炸物","化学品","武器","不确定","没有危险物品"],
-warning:"禁止托运 请随身携带",
-ask:"请咨询工作人员",
-safe:"没有危险物品"
-},
-
-ja:{
-title:"預け荷物禁止物",
-instruction:"物品を選択してください",
-items:["モバイルバッテリー","電池","電子タバコ","ノートパソコン","ライター","爆発物","化学物質","武器","不明","危険物なし"],
-warning:"預け入れ不可 機内持ち込み",
-ask:"係員にお尋ねください",
-safe:"危険物はありません"
-},
-
-ko:{
-title:"위탁 수하물 금지 물품",
-instruction:"물품을 선택하세요",
-items:["보조배터리","배터리","전자담배","노트북","라이터","폭발물","화학물질","무기","모름","위험물 없음"],
-warning:"위탁 수하물 금지",
-ask:"직원에게 문의",
-safe:"위험물 없음"
-},
-
-es:{
-title:"Artículos prohibidos",
-instruction:"Seleccione un artículo",
-items:["Batería portátil","Batería","Cigarrillo electrónico","Portátil","Encendedor","Explosivo","Químico","Arma","No seguro","Sin peligro"],
-warning:"No permitido",
-ask:"Pregunte al personal",
-safe:"Sin peligro"
-},
-
-fr:{
-title:"Articles interdits",
-instruction:"Sélectionnez un article",
-items:["Batterie externe","Batterie","Cigarette électronique","Ordinateur","Briquet","Explosif","Produit chimique","Arme","Pas sûr","Aucun danger"],
-warning:"Interdit en soute",
-ask:"Demandez au personnel",
-safe:"Aucun danger"
-},
-
-de:{
-title:"Verbotene Gegenstände",
-instruction:"Artikel wählen",
-items:["Powerbank","Batterie","E-Zigarette","Laptop","Feuerzeug","Explosivstoff","Chemikalie","Waffe","Unsicher","Keine Gefahr"],
-warning:"Nicht erlaubt",
-ask:"Personal fragen",
-safe:"Keine Gefahr"
-},
-
-ru:{
-title:"Запрещённые предметы",
-instruction:"Выберите предмет",
-items:["Пауэрбанк","Батарея","Эл. сигарета","Ноутбук","Зажигалка","Взрывчатка","Химикаты","Оружие","Не уверен","Нет опасности"],
-warning:"Запрещено",
-ask:"Спросите сотрудника",
-safe:"Нет опасности"
-},
-
-ar:{
-title:"مواد محظورة",
-instruction:"اختر العنصر",
-items:["بنك طاقة","بطارية","سيجارة إلكترونية","كمبيوتر","ولاعة","متفجرات","مواد كيميائية","سلاح","غير متأكد","لا يوجد خطر"],
-warning:"ممنوع",
-ask:"اسأل الموظف",
-safe:"لا يوجد خطر"
-},
-
-hi:{
-title:"प्रतिबंधित वस्तुएँ",
-instruction:"वस्तु चुनें",
-items:["पावर बैंक","बैटरी","ई-सिगरेट","लैपटॉप","लाइटर","विस्फोटक","रसायन","हथियार","पता नहीं","कोई खतरा नहीं"],
-warning:"अनुमति नहीं",
-ask:"स्टाफ से पूछें",
-safe:"कोई खतरा नहीं"
+function saveStats(){
+localStorage.setItem("stats",JSON.stringify(stats))
 }
 
+function resetData(){
+stats=Array(10).fill(0)
+saveStats()
+alert("Data reset")
 }
 
 /* UI */
-
-function changeLang(lang){
-
-currentLang=lang
-
-loadUI()
-
-}
 
 function loadUI(){
 
@@ -284,10 +288,6 @@ let c=document.createElement("div")
 
 c.className="card"
 
-if(i==9){c.classList.add("safe")}
-else if(i==8){c.classList.add("unknown")}
-else{c.classList.add("danger")}
-
 let img=document.createElement("img")
 img.src=images[i]
 
@@ -297,7 +297,7 @@ text.innerText=item
 c.appendChild(img)
 c.appendChild(text)
 
-c.onclick=()=>selectItem(i)
+c.onclick=()=>selectItem(i,c)
 
 cards.appendChild(c)
 
@@ -305,24 +305,45 @@ cards.appendChild(c)
 
 }
 
-function selectItem(i){
+function selectItem(i,card){
 
 let t=translations[currentLang]
 
+stats[i]++
+saveStats()
+
+document.querySelectorAll(".card").forEach(el=>{
+el.classList.remove("danger","safe","unknown")
+})
+
 let text=""
 
-if(i==9){text=t.safe}
-else if(i==8){text=t.ask}
-else{text=t.warning}
+if(i==0){
+
+card.classList.add("safe")
+text=t.safe
+
+}else if(i==9){
+
+card.classList.add("unknown")
+text=t.ask
+
+}else{
+
+card.classList.add("danger")
+beep.play()
+text=t.warning
+
+}
 
 message.innerText=text
-
 speak(text)
 
 }
 
 /* START */
 
+loadVoices()
 loadUI()
 
 </script>
